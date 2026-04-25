@@ -628,7 +628,24 @@ await viewPhotos(galleryId);
 }
 
 async function viewPhotos(galleryId){
-currentGalleryId = galleryId;
+const boxId = "photos-" + galleryId;
+let box = document.getElementById(boxId);
+
+if(!box){
+const card = event.target.closest(".gallery-card");
+box = document.createElement("div");
+box.className = "photos";
+box.id = boxId;
+card.appendChild(box);
+}
+
+if(box.dataset.open === "true"){
+box.innerHTML = "";
+box.dataset.open = "false";
+return;
+}
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading photos...</p>`;
 
 const { data, error } = await supabaseClient
 .from("gallery_photos")
@@ -637,18 +654,65 @@ const { data, error } = await supabaseClient
 .order("created_at", { ascending:true });
 
 if(error){
-alert(error.message);
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
 return;
 }
 
 if(!data || !data.length){
-alert("No photos uploaded yet.");
+box.innerHTML = `<p style="color:#f3d9b9;">No photos uploaded yet.</p>`;
+box.dataset.open = "true";
+return;
+}
+
+box.innerHTML = "";
+box.dataset.open = "true";
+
+data.forEach((photo, index) => {
+const div = document.createElement("div");
+div.className = "photo";
+
+div.innerHTML = `
+<img src="${photo.image_url}" alt="Gallery photo" onclick="openPhotoViewerFromGrid('${galleryId}', ${index})">
+<button class="danger" onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
+`;
+
+box.appendChild(div);
+});
+}
+
+  async function openPhotoViewerFromGrid(galleryId, index){
+currentGalleryId = galleryId;
+
+const { data, error } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id", galleryId)
+.order("created_at", { ascending:true });
+
+if(error || !data || !data.length){
+alert("Could not open photos.");
 return;
 }
 
 currentPhotos = data;
-currentPhotoIndex = 0;
+currentPhotoIndex = index;
 openPhotoViewer();
+}
+
+async function deletePhotoFromGrid(photoId, filePath, galleryId){
+if(!confirm("Delete this photo?")) return;
+
+await supabaseClient.storage
+.from("gallery-photos")
+.remove([filePath]);
+
+await supabaseClient
+.from("gallery_photos")
+.delete()
+.eq("id", photoId);
+
+await viewPhotos(galleryId);
+await viewPhotos(galleryId);
 }
 
 function openPhotoViewer(){
