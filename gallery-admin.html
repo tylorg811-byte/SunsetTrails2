@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gallery Admin | Sunset Trails Photography</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:Inter,sans-serif;
+background:#120b05;
+color:white;
+min-height:100vh;
+background:radial-gradient(circle at top,#5b2d0c,#120b05 55%,#050201);
+}
+header{
+padding:22px 7%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(20,12,5,.58);
+backdrop-filter:blur(18px);
+border-bottom:1px solid rgba(255,204,120,.18);
+}
+.logo{
+font-family:'Playfair Display',serif;
+font-size:25px;
+color:#ffd38a;
+}
+.container{
+padding:50px 7%;
+max-width:1300px;
+margin:auto;
+}
+h1,h2{
+font-family:'Playfair Display',serif;
+color:#ffd38a;
+}
+h1{font-size:clamp(40px,6vw,70px);margin-bottom:10px}
+.sub{color:#f4d6ad;margin-bottom:34px;line-height:1.7}
+.panel{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,211,138,.22);
+border-radius:28px;
+padding:26px;
+box-shadow:0 25px 70px rgba(0,0,0,.28);
+backdrop-filter:blur(18px);
+margin-bottom:25px;
+}
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+input,textarea,select{
+width:100%;
+padding:15px 16px;
+border:none;
+outline:none;
+border-radius:15px;
+background:rgba(255,255,255,.92);
+font-size:15px;
+font-family:Inter,sans-serif;
+}
+textarea{min-height:105px;resize:vertical}
+label{
+display:block;
+font-weight:800;
+color:#ffd38a;
+margin-bottom:8px;
+font-size:14px;
+}
+.field{margin-bottom:16px}
+button{
+border:none;
+cursor:pointer;
+border-radius:999px;
+padding:14px 22px;
+font-weight:900;
+background:linear-gradient(135deg,#ffd38a,#c77b28);
+color:#1b0e04;
+box-shadow:0 15px 35px rgba(199,123,40,.28);
+}
+.secondary{
+background:rgba(255,255,255,.1);
+color:white;
+border:1px solid rgba(255,255,255,.18);
+box-shadow:none;
+}
+.danger{
+background:#7d1f1f;
+color:white;
+box-shadow:none;
+}
+.admin{
+display:none;
+}
+.gallery-list{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:18px;
+}
+.gallery-card{
+padding:20px;
+border-radius:22px;
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,211,138,.18);
+}
+.gallery-card h3{
+color:#ffd38a;
+margin-bottom:8px;
+font-size:22px;
+}
+.gallery-card p{
+color:#f3d9b9;
+font-size:14px;
+line-height:1.6;
+}
+.code{
+display:inline-block;
+margin:12px 0;
+padding:8px 12px;
+border-radius:999px;
+background:rgba(255,211,138,.16);
+color:#ffd38a;
+font-weight:900;
+letter-spacing:.5px;
+}
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+.photos{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+margin-top:18px;
+}
+.photo{
+border-radius:16px;
+overflow:hidden;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.12);
+}
+.photo img{
+width:100%;
+height:170px;
+object-fit:cover;
+display:block;
+}
+.photo button{
+width:100%;
+border-radius:0;
+padding:11px;
+font-size:13px;
+}
+.message{
+margin-top:14px;
+color:#ffd38a;
+font-weight:700;
+}
+@media(max-width:900px){
+.grid,.gallery-list{grid-template-columns:1fr}
+.photos{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+.container{padding:35px 5%}
+header{padding:18px 5%}
+.photos{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">Sunset Trails Admin</div>
+<button class="secondary" onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+
+<section id="loginPanel" class="panel">
+<h1>Gallery Admin</h1>
+<p class="sub">Log in to create client galleries, upload photos, and manage access codes.</p>
+
+<div class="field">
+<label>Email</label>
+<input id="email" type="email" placeholder="admin@email.com">
+</div>
+
+<div class="field">
+<label>Password</label>
+<input id="password" type="password" placeholder="Password">
+</div>
+
+<button onclick="login()">Login</button>
+<div class="message" id="loginMessage"></div>
+</section>
+
+<section id="adminPanel" class="admin">
+
+<h1>Client Gallery Console</h1>
+<p class="sub">Create a gallery, upload photos, then send the client their access code.</p>
+
+<div class="panel">
+<h2>Create New Gallery</h2>
+<br>
+
+<div class="grid">
+<div class="field">
+<label>Client Name</label>
+<input id="clientName" placeholder="Jones Family">
+</div>
+
+<div class="field">
+<label>Gallery Code</label>
+<input id="galleryCode" placeholder="SUNSET-JONES-2026">
+</div>
+</div>
+
+<div class="grid">
+<div class="field">
+<label>Package Name</label>
+<input id="packageName" placeholder="Wedding Gallery / Family Session / Senior Photos">
+</div>
+
+<div class="field">
+<label>Payment Link Later</label>
+<input id="paymentLink" placeholder="Leave blank for now">
+</div>
+</div>
+
+<div class="field">
+<label>Gallery Notes</label>
+<textarea id="notes" placeholder="Your edited photos are ready. Download your favorites below."></textarea>
+</div>
+
+<button onclick="createGallery()">Create Gallery</button>
+<div class="message" id="createMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Upload Photos</h2>
+<br>
+
+<div class="field">
+<label>Select Gallery</label>
+<select id="gallerySelect"></select>
+</div>
+
+<div class="field">
+<label>Choose Photos</label>
+<input id="photoFiles" type="file" accept="image/*" multiple>
+</div>
+
+<div class="field">
+<label>Caption Optional</label>
+<input id="caption" placeholder="Sunset Trails Photography">
+</div>
+
+<button onclick="uploadPhotos()">Upload Photos</button>
+<div class="message" id="uploadMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Existing Galleries</h2>
+<br>
+<div class="gallery-list" id="galleryList"></div>
+</div>
+
+</section>
+</div>
+
+<script>
+const SUPABASE_URL = "https://ujxuirmeikbzakqaerec.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_gLnNGeQUUbjLoQlN5g2t9g_XXQpy9P3";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allGalleries = [];
+
+window.addEventListener("load", async () => {
+const { data } = await supabaseClient.auth.getSession();
+if(data.session){
+showAdmin();
+}
+});
+
+async function login(){
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value.trim();
+const msg = document.getElementById("loginMessage");
+
+const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+if(error){
+msg.textContent = error.message;
+return;
+}
+
+showAdmin();
+}
+
+async function logout(){
+await supabaseClient.auth.signOut();
+location.reload();
+}
+
+async function showAdmin(){
+document.getElementById("loginPanel").style.display = "none";
+document.getElementById("adminPanel").style.display = "block";
+await loadGalleries();
+}
+
+function makeCode(name){
+return "SUNSET-" + name.trim().replace(/[^a-z0-9]/gi,"-").replace(/-+/g,"-").toUpperCase() + "-" + new Date().getFullYear();
+}
+
+document.getElementById("clientName").addEventListener("input", () => {
+const codeInput = document.getElementById("galleryCode");
+if(!codeInput.value.trim()){
+codeInput.value = makeCode(document.getElementById("clientName").value);
+}
+});
+
+async function createGallery(){
+const client_name = document.getElementById("clientName").value.trim();
+const gallery_code = document.getElementById("galleryCode").value.trim().toUpperCase();
+const package_name = document.getElementById("packageName").value.trim();
+const payment_link = document.getElementById("paymentLink").value.trim();
+const notes = document.getElementById("notes").value.trim();
+const msg = document.getElementById("createMessage");
+
+if(!client_name || !gallery_code){
+msg.textContent = "Client name and gallery code are required.";
+return;
+}
+
+const { error } = await supabaseClient
+.from("client_galleries")
+.insert([{ client_name, gallery_code, package_name, payment_link, notes }]);
+
+if(error){
+msg.textContent = error.message;
+return;
+}
+
+msg.textContent = "Gallery created successfully.";
+
+document.getElementById("clientName").value = "";
+document.getElementById("galleryCode").value = "";
+document.getElementById("packageName").value = "";
+document.getElementById("paymentLink").value = "";
+document.getElementById("notes").value = "";
+
+await loadGalleries();
+}
+
+async function loadGalleries(){
+const { data, error } = await supabaseClient
+.from("client_galleries")
+.select("*")
+.order("created_at", { ascending:false });
+
+if(error){
+console.log(error);
+return;
+}
+
+allGalleries = data || [];
+
+const select = document.getElementById("gallerySelect");
+const list = document.getElementById("galleryList");
+
+select.innerHTML = "";
+list.innerHTML = "";
+
+allGalleries.forEach(gallery => {
+const opt = document.createElement("option");
+opt.value = gallery.id;
+opt.textContent = gallery.client_name + " — " + gallery.gallery_code;
+select.appendChild(opt);
+
+const card = document.createElement("div");
+card.className = "gallery-card";
+card.innerHTML = `
+<h3>${gallery.client_name}</h3>
+<p>${gallery.package_name || "No package listed"}</p>
+<span class="code">${gallery.gallery_code}</span>
+<p>${gallery.notes || ""}</p>
+<div class="actions">
+<button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
+<button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
+<button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
+</div>
+<div class="photos" id="photos-${gallery.id}"></div>
+`;
+list.appendChild(card);
+});
+}
+
+function copyCode(code){
+navigator.clipboard.writeText(code);
+alert("Copied: " + code);
+}
+
+async function uploadPhotos(){
+const galleryId = document.getElementById("gallerySelect").value;
+const files = document.getElementById("photoFiles").files;
+const caption = document.getElementById("caption").value.trim();
+const msg = document.getElementById("uploadMessage");
+
+if(!galleryId){
+msg.textContent = "Please choose a gallery first.";
+return;
+}
+
+if(!files.length){
+msg.textContent = "Please select at least one photo.";
+return;
+}
+
+msg.textContent = "Uploading photos...";
+
+for(const file of files){
+const fileExt = file.name.split(".").pop();
+const fileName = `${galleryId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+const { error: uploadError } = await supabaseClient.storage
+.from("gallery-photos")
+.upload(fileName, file);
+
+if(uploadError){
+msg.textContent = uploadError.message;
+return;
+}
+
+const { data: publicData } = supabaseClient.storage
+.from("gallery-photos")
+.getPublicUrl(fileName);
+
+const { error: dbError } = await supabaseClient
+.from("gallery_photos")
+.insert([{
+gallery_id: galleryId,
+image_url: publicData.publicUrl,
+file_path: fileName,
+caption: caption
+}]);
+
+if(dbError){
+msg.textContent = dbError.message;
+return;
+}
+}
+
+document.getElementById("photoFiles").value = "";
+document.getElementById("caption").value = "";
+msg.textContent = "Photos uploaded successfully.";
+await viewPhotos(galleryId);
+}
+
+async function viewPhotos(galleryId){
+const box = document.getElementById("photos-" + galleryId);
+box.innerHTML = "Loading...";
+
+const { data, error } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id", galleryId)
+.order("created_at", { ascending:false });
+
+if(error){
+box.innerHTML = error.message;
+return;
+}
+
+if(!data.length){
+box.innerHTML = "<p>No photos uploaded yet.</p>";
+return;
+}
+
+box.innerHTML = "";
+
+data.forEach(photo => {
+const div = document.createElement("div");
+div.className = "photo";
+div.innerHTML = `
+<img src="${photo.image_url}">
+<button class="danger" onclick="deletePhoto('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
+`;
+box.appendChild(div);
+});
+}
+
+async function deletePhoto(photoId, filePath, galleryId){
+if(!confirm("Delete this photo?")) return;
+
+await supabaseClient.storage.from("gallery-photos").remove([filePath]);
+await supabaseClient.from("gallery_photos").delete().eq("id", photoId);
+
+await viewPhotos(galleryId);
+}
+
+async function deleteGallery(galleryId){
+if(!confirm("Delete this whole gallery and its photos?")) return;
+
+const { data: photos } = await supabaseClient
+.from("gallery_photos")
+.select("file_path")
+.eq("gallery_id", galleryId);
+
+if(photos && photos.length){
+await supabaseClient.storage
+.from("gallery-photos")
+.remove(photos.map(p => p.file_path));
+}
+
+await supabaseClient.from("client_galleries").delete().eq("id", galleryId);
+await loadGalleries();
+}
+</script>
+
+</body>
+</html>
