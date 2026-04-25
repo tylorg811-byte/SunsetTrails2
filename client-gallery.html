@@ -162,7 +162,7 @@ currentPhotos=photos;
 
 photos.forEach((photo,index)=>{
 const isProof=!photo.is_approved;
-const showWatermark=photo.watermark_enabled && isProof;
+const showWatermark = photo.is_approved !== true && photo.watermark_enabled !== false;
 const card=document.createElement("div");
 card.className="card";
 card.innerHTML=`
