@@ -583,6 +583,73 @@ header{padding:16px 5%}
     width:100%;
   }
 }
+
+  /* FIX EXISTING GALLERIES + ALBUM STRIP WIDTH */
+.gallery-list{
+  display:block;
+  width:100%;
+}
+
+.gallery-card{
+  width:100%;
+  max-width:none;
+  display:block;
+  overflow:hidden;
+}
+
+.album-list{
+  width:100%;
+  display:block;
+  margin-top:24px;
+}
+
+.album-card{
+  width:100%;
+  max-width:none;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:26px;
+  padding:26px 28px;
+  border-radius:24px;
+}
+
+.album-card strong{
+  font-size:34px;
+  line-height:1.05;
+}
+
+.album-card p{
+  max-width:none;
+}
+
+.album-card .actions{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:12px;
+  margin-top:0;
+  flex-wrap:wrap;
+}
+
+.album-card .actions button{
+  min-width:190px;
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .album-card{
+    grid-template-columns:1fr;
+  }
+
+  .album-card .actions{
+    justify-content:flex-start;
+  }
+
+  .album-card .actions button{
+    width:100%;
+  }
+}
 </style>
 </head>
 
@@ -1276,15 +1343,24 @@ return album ? album.album_name : "Album";
 }
 
 async function viewAlbumPhotos(galleryId, albumId){
-currentGalleryId = galleryId;
-
 const box = document.getElementById("photos-" + galleryId);
 if(!box) return;
+
+/* TOGGLE LOGIC */
+if(box.dataset.open === "true" && box.dataset.album === albumId){
+box.innerHTML = "";
+box.dataset.open = "false";
+box.dataset.album = "";
+return;
+}
+
+currentGalleryId = galleryId;
 
 await loadUploadAlbums(galleryId);
 
 box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
 box.dataset.open = "true";
+box.dataset.album = albumId;
 
 const { data, error } = await supabaseClient
 .from("gallery_photos")
@@ -1311,7 +1387,9 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} • ${getAlbumName(galleryId, photo.album_id)} • $${Number(photo.price || 0).toFixed(2)}</span>
+<span class="badge">
+${photo.is_approved ? "Final" : "Proof"} • $${Number(photo.price || 0).toFixed(2)}
+</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
