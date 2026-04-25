@@ -248,6 +248,47 @@ flex-wrap:wrap;
 margin-top:12px;
 }
 
+.album-tools{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:14px;
+margin-top:14px;
+}
+
+.album-note{
+color:#f3d9b9;
+font-size:13px;
+line-height:1.55;
+margin-top:8px;
+}
+
+.album-list{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+margin-top:14px;
+}
+
+.album-card{
+background:rgba(255,211,138,.08);
+border:1px solid rgba(255,211,138,.18);
+border-radius:18px;
+padding:15px;
+}
+
+.album-card strong{
+color:#ffd38a;
+font-family:'Playfair Display',serif;
+font-size:21px;
+}
+
+.album-card p{
+color:#f3d9b9;
+font-size:13px;
+line-height:1.5;
+margin-top:5px;
+}
+
 .photos{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(130px,160px));
@@ -413,7 +454,7 @@ grid-template-columns:1fr 1fr;
 
 @media(max-width:1000px){
 .stats{grid-template-columns:repeat(2,1fr)}
-.grid,.three-grid,.gallery-list,.list{grid-template-columns:1fr}
+.grid,.three-grid,.gallery-list,.list,.album-tools,.album-list{grid-template-columns:1fr}
 .viewer-edit .grid{grid-template-columns:1fr}
 }
 
@@ -530,6 +571,40 @@ header{padding:16px 5%}
 <div class="field">
 <label>Select Gallery</label>
 <select id="gallerySelect"></select>
+</div>
+
+<div class="panel" style="padding:18px;margin-bottom:16px;background:rgba(255,211,138,.055);">
+<h2 style="font-size:26px;">Album Options For This Upload</h2>
+<p class="album-note">Choose an existing album, create a new album before uploading, or leave this set to individual photos.</p>
+
+<div class="grid" style="margin-top:14px;">
+<div class="field">
+<label>Upload Into Album</label>
+<select id="uploadAlbumSelect">
+<option value="">Individual photos / No album</option>
+</select>
+</div>
+
+<div class="field">
+<label>New Album Name</label>
+<input id="newAlbumName" placeholder="Smith Wedding Album / Family Favorites">
+</div>
+</div>
+
+<div class="grid">
+<div class="field">
+<label>New Album Price</label>
+<input id="newAlbumPrice" type="number" step="0.01" placeholder="75.00">
+</div>
+
+<div class="field">
+<label>New Album Description</label>
+<input id="newAlbumDescription" placeholder="A curated album package from this session.">
+</div>
+</div>
+
+<button onclick="createAlbumForUpload()">Create Album For This Upload</button>
+<div class="message" id="albumMessage"></div>
 </div>
 
 <div class="field">
@@ -666,10 +741,16 @@ let allGalleries = [];
 let currentPhotos = [];
 let currentPhotoIndex = 0;
 let currentGalleryId = null;
+let albumCache = {};
+let albumPhotoMode = "all";
 
 window.addEventListener("load", async () => {
 const { data } = await supabaseClient.auth.getSession();
 if(data.session) showAdmin();
+});
+
+document.getElementById("gallerySelect").addEventListener("change", async () => {
+await loadUploadAlbums(document.getElementById("gallerySelect").value);
 });
 
 async function login(){
@@ -816,15 +897,215 @@ card.innerHTML = `
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
+<button class="secondary" onclick="viewAlbums('${gallery.id}')">Manage Albums</button>
 <button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Gallery Pricing</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
 
+<div class="album-list" id="albums-${gallery.id}" data-open="false"></div>
 <div class="photos" id="photos-${gallery.id}" data-open="false"></div>
 `;
 
 list.appendChild(card);
 });
+
+if(allGalleries.length && select.value){
+await loadUploadAlbums(select.value);
+}
+}
+
+async function loadUploadAlbums(galleryId){
+const select = document.getElementById("uploadAlbumSelect");
+if(!select) return;
+
+select.innerHTML = `<option value="">Individual photos / No album</option>`;
+
+if(!galleryId) return;
+
+const { data, error } = await supabaseClient
+.from("photo_albums")
+.select("*")
+.eq("gallery_id", galleryId)
+.order("created_at", {ascending:false});
+
+if(error){
+document.getElementById("albumMessage").textContent = error.message;
+return;
+}
+
+albumCache[galleryId] = data || [];
+
+(data || []).forEach(album => {
+const opt = document.createElement("option");
+opt.value = album.id;
+opt.textContent = `${album.album_name || "Untitled Album"} — $${Number(album.album_price || 0).toFixed(2)}`;
+select.appendChild(opt);
+});
+}
+
+async function createAlbumForUpload(){
+const galleryId = document.getElementById("gallerySelect").value;
+const album_name = document.getElementById("newAlbumName").value.trim();
+const album_price = parseFloat(document.getElementById("newAlbumPrice").value || "0");
+const album_description = document.getElementById("newAlbumDescription").value.trim();
+const msg = document.getElementById("albumMessage");
+
+msg.textContent = "";
+
+if(!galleryId){
+msg.textContent = "Choose a gallery first.";
+return;
+}
+
+if(!album_name){
+msg.textContent = "Enter an album name.";
+return;
+}
+
+const { data, error } = await supabaseClient
+.from("photo_albums")
+.insert([{
+gallery_id: galleryId,
+album_name,
+album_price: album_price || 0,
+album_description: album_description || ""
+}])
+.select()
+.single();
+
+if(error){
+msg.textContent = error.message;
+return;
+}
+
+msg.textContent = "Album created. It is now selected for this upload.";
+
+document.getElementById("newAlbumName").value = "";
+document.getElementById("newAlbumPrice").value = "";
+document.getElementById("newAlbumDescription").value = "";
+
+await loadUploadAlbums(galleryId);
+document.getElementById("uploadAlbumSelect").value = data.id;
+
+const albumBox = document.getElementById("albums-" + galleryId);
+if(albumBox){
+albumBox.dataset.open = "false";
+albumBox.innerHTML = "";
+}
+}
+
+async function viewAlbums(galleryId){
+const box = document.getElementById("albums-" + galleryId);
+if(!box) return;
+
+if(box.dataset.open === "true"){
+box.innerHTML = "";
+box.dataset.open = "false";
+return;
+}
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading albums...</p>`;
+
+const { data, error } = await supabaseClient
+.from("photo_albums")
+.select("*")
+.eq("gallery_id", galleryId)
+.order("created_at", {ascending:false});
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+albumCache[galleryId] = data || [];
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No albums created yet.</p>`;
+box.dataset.open = "true";
+return;
+}
+
+box.innerHTML = "";
+box.dataset.open = "true";
+
+data.forEach(album => {
+const div = document.createElement("div");
+div.className = "album-card";
+div.innerHTML = `
+<strong>${album.album_name || "Untitled Album"}</strong>
+<p><b>Price:</b> $${Number(album.album_price || 0).toFixed(2)}</p>
+<p>${album.album_description || "No description added."}</p>
+<div class="actions">
+<button onclick="viewAlbumPhotos('${galleryId}','${album.id}')">View Album Photos</button>
+<button class="secondary" onclick="editAlbum('${galleryId}','${album.id}')">Edit Album</button>
+<button class="danger" onclick="deleteAlbum('${galleryId}','${album.id}')">Delete Album</button>
+</div>
+`;
+box.appendChild(div);
+});
+}
+
+async function editAlbum(galleryId, albumId){
+const album = (albumCache[galleryId] || []).find(a => a.id === albumId);
+if(!album) return;
+
+const album_name = prompt("Album name:", album.album_name || "Untitled Album");
+if(album_name === null) return;
+
+const album_price = prompt("Album price:", Number(album.album_price || 0).toFixed(2));
+if(album_price === null) return;
+
+const album_description = prompt("Album description:", album.album_description || "");
+if(album_description === null) return;
+
+const { error } = await supabaseClient
+.from("photo_albums")
+.update({
+album_name: album_name || "Untitled Album",
+album_price: parseFloat(album_price || "0") || 0,
+album_description: album_description || ""
+})
+.eq("id", albumId);
+
+if(error){
+alert(error.message);
+return;
+}
+
+await loadUploadAlbums(galleryId);
+const box = document.getElementById("albums-" + galleryId);
+if(box){
+box.dataset.open = "false";
+box.innerHTML = "";
+await viewAlbums(galleryId);
+}
+}
+
+async function deleteAlbum(galleryId, albumId){
+if(!confirm("Delete this album? Photos will stay in the gallery, but they will no longer be grouped in this album.")) return;
+
+await supabaseClient
+.from("gallery_photos")
+.update({album_id:null})
+.eq("album_id", albumId);
+
+const { error } = await supabaseClient
+.from("photo_albums")
+.delete()
+.eq("id", albumId);
+
+if(error){
+alert(error.message);
+return;
+}
+
+await loadUploadAlbums(galleryId);
+const box = document.getElementById("albums-" + galleryId);
+if(box){
+box.dataset.open = "false";
+box.innerHTML = "";
+await viewAlbums(galleryId);
+}
 }
 
 async function editGalleryPricing(galleryId){
@@ -869,6 +1150,7 @@ const caption = document.getElementById("caption").value.trim();
 const price = parseFloat(document.getElementById("photoPrice").value || "0");
 const isApproved = document.getElementById("approvedUpload").value === "true";
 const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
+const albumId = document.getElementById("uploadAlbumSelect").value || null;
 const msg = document.getElementById("uploadMessage");
 
 msg.textContent = "";
@@ -921,7 +1203,8 @@ file_path:filePath,
 caption:caption || "Sunset Trails Photography",
 is_approved:isApproved,
 watermark_enabled:watermarkEnabled,
-price:price || 0
+price:price || 0,
+album_id:albumId
 }]);
 
 if(dbError){
@@ -943,6 +1226,12 @@ box.innerHTML = "";
 }
 
 await viewPhotos(galleryId);
+}
+
+function getAlbumName(galleryId, albumId){
+if(!albumId) return "Individual";
+const album = (albumCache[galleryId] || []).find(a => a.id === albumId);
+return album ? album.album_name : "Album";
 }
 
 async function viewPhotos(galleryId){
@@ -975,6 +1264,7 @@ box.dataset.open = "true";
 return;
 }
 
+await loadUploadAlbums(galleryId);
 currentPhotos = data;
 
 box.innerHTML = "";
@@ -985,7 +1275,7 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} • $${Number(photo.price || 0).toFixed(2)}</span>
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} • ${getAlbumName(galleryId, photo.album_id)} • $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index})">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
@@ -994,15 +1284,65 @@ box.appendChild(div);
 });
 }
 
-async function openViewer(galleryId,index){
+async function viewAlbumPhotos(galleryId, albumId){
 currentGalleryId = galleryId;
+albumPhotoMode = albumId;
 
-const { data } = await supabaseClient
+const box = document.getElementById("photos-" + galleryId);
+if(!box) return;
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
+box.dataset.open = "true";
+
+await loadUploadAlbums(galleryId);
+
+const { data, error } = await supabaseClient
 .from("gallery_photos")
 .select("*")
-.eq("gallery_id",galleryId)
-.order("created_at",{ascending:true});
+.eq("gallery_id", galleryId)
+.eq("album_id", albumId)
+.order("created_at", {ascending:true});
 
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No photos in this album yet.</p>`;
+return;
+}
+
+currentPhotos = data;
+box.innerHTML = "";
+
+data.forEach((photo,index) => {
+const div = document.createElement("div");
+div.className = "photo";
+div.innerHTML = `
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} • ${getAlbumName(galleryId, photo.album_id)} • $${Number(photo.price || 0).toFixed(2)}</span>
+<img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
+<button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
+`;
+box.appendChild(div);
+});
+}
+
+async function openViewer(galleryId,index,albumId = null){
+currentGalleryId = galleryId;
+
+let query = supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id",galleryId);
+
+if(albumId){
+query = query.eq("album_id", albumId);
+}
+
+const { data } = await query.order("created_at",{ascending:true});
+
+await loadUploadAlbums(galleryId);
 currentPhotos = data || [];
 currentPhotoIndex = index;
 renderViewer();
@@ -1015,7 +1355,7 @@ const p = currentPhotos[currentPhotoIndex];
 
 document.getElementById("viewerImg").src = p.image_url;
 document.getElementById("viewerInfo").textContent =
-`${currentPhotoIndex + 1} / ${currentPhotos.length} — ${p.is_approved ? "Approved Final" : "Proof"} — Watermark: ${p.watermark_enabled ? "On" : "Off"} — $${Number(p.price || 0).toFixed(2)}`;
+`${currentPhotoIndex + 1} / ${currentPhotos.length} — ${p.is_approved ? "Approved Final" : "Proof"} — ${getAlbumName(currentGalleryId, p.album_id)} — Watermark: ${p.watermark_enabled ? "On" : "Off"} — $${Number(p.price || 0).toFixed(2)}`;
 
 document.getElementById("editCaption").value = p.caption || "";
 document.getElementById("editPrice").value = Number(p.price || 0).toFixed(2);
@@ -1169,6 +1509,7 @@ if(photos && photos.length){
 await supabaseClient.storage.from("gallery-photos").remove(photos.map(p => p.file_path));
 }
 
+await supabaseClient.from("photo_albums").delete().eq("gallery_id",galleryId);
 await supabaseClient.from("client_galleries").delete().eq("id",galleryId);
 await refreshAll();
 }
