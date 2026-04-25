@@ -324,6 +324,65 @@ position:relative;
 position:relative;
 }
 
+
+.photo-section{
+margin:34px 0 38px;
+}
+
+.photo-section-head{
+margin-bottom:18px;
+padding:22px;
+border-radius:28px;
+background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035));
+border:1px solid rgba(255,211,138,.2);
+box-shadow:0 22px 64px rgba(0,0,0,.22);
+backdrop-filter:blur(16px);
+}
+
+.photo-section-head h3{
+font-family:'Playfair Display',serif;
+font-size:clamp(30px,4vw,48px);
+color:var(--gold);
+line-height:1;
+margin-bottom:8px;
+}
+
+.photo-section-head p{
+color:#f3d9b9;
+line-height:1.65;
+max-width:900px;
+}
+
+.photo-section-actions{
+display:flex;
+justify-content:space-between;
+gap:18px;
+flex-wrap:wrap;
+align-items:center;
+margin-top:16px;
+}
+
+.photo-section-price{
+font-size:24px;
+font-weight:900;
+color:white;
+}
+
+.album-photo-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:22px;
+}
+
+.album-empty{
+padding:24px;
+border-radius:22px;
+border:1px dashed rgba(255,211,138,.25);
+color:#f3d9b9;
+background:rgba(255,255,255,.045);
+}
+
+
 .cart-bar{
 display:flex;
 justify-content:space-between;
@@ -639,7 +698,7 @@ border-radius:18px;
 }
 
 @media(max-width:1000px){
-.grid{grid-template-columns:1fr 1fr}
+.grid,.album-photo-grid{grid-template-columns:1fr 1fr}
 .instructions{grid-template-columns:1fr}
 .album-section{grid-template-columns:1fr}
 .gallery-top{display:block}
@@ -650,6 +709,7 @@ border-radius:18px;
 }
 
 @media(max-width:600px){
+.album-photo-grid{grid-template-columns:1fr}
 header{padding:17px 5%}
 .logo{font-size:21px}
 .hero{padding:68px 5% 36px}
@@ -735,21 +795,7 @@ header{padding:17px 5%}
 </div>
 </div>
 
-<div class="album-section" id="albumSection">
-<div class="album-card" id="fullGalleryCard">
-<h3>Full Gallery Download</h3>
-<p>Purchase the full edited gallery package when available.</p>
-<div class="album-price" id="fullGalleryPrice">$0.00</div>
-<button onclick="addFullGallery()">Add Full Gallery</button>
-</div>
-
-<div class="album-card" id="albumPackageCard">
-<h3 id="albumPackageName">Album Package</h3>
-<p>A curated set of professionally edited favorites.</p>
-<div class="album-price" id="albumPackagePrice">$0.00</div>
-<button onclick="addAlbumPackage()">Add Album Package</button>
-</div>
-</div>
+<div class="album-section" id="albumSection"></div>
 
 <div class="cart-bar">
 <div>
@@ -826,6 +872,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentGallery = null;
 let currentPhotos = [];
+let currentAlbums = [];
 let currentIndex = 0;
 let selectedPhoto = null;
 let favorites = new Set();
@@ -878,6 +925,14 @@ return;
 
 currentGallery = gallery;
 
+const { data: albums, error: albumError } = await supabaseClient
+.from("photo_albums")
+.select("*")
+.eq("gallery_id", gallery.id)
+.order("created_at", { ascending:true });
+
+currentAlbums = albumError ? [] : (albums || []);
+
 const { data: photos, error: photoError } = await supabaseClient
 .from("gallery_photos")
 .select("*")
@@ -887,27 +942,20 @@ const { data: photos, error: photoError } = await supabaseClient
 document.getElementById("clientName").textContent = gallery.client_name + " Gallery";
 document.getElementById("galleryNotes").textContent = gallery.notes || "Watermarked proofs are previews. Approved finals can be downloaded. Favorite the images you love or purchase additional photos below.";
 
-const fullPrice = Number(gallery.full_gallery_price || 0);
-const albumPrice = Number(gallery.album_price || 0);
-
-document.getElementById("fullGalleryPrice").textContent = "$" + fullPrice.toFixed(2);
-document.getElementById("albumPackagePrice").textContent = "$" + albumPrice.toFixed(2);
-document.getElementById("albumPackageName").textContent = gallery.album_name || "Album Package";
-
-document.getElementById("fullGalleryCard").style.display = fullPrice > 0 ? "block" : "none";
-document.getElementById("albumPackageCard").style.display = albumPrice > 0 ? "block" : "none";
-document.getElementById("albumSection").style.display = (fullPrice > 0 || albumPrice > 0) ? "grid" : "none";
+renderPurchaseAlbums();
 
 document.getElementById("accessBox").style.display = "none";
 document.getElementById("galleryWrap").style.display = "block";
 
-if(photoError || !photos || !photos.length){
+currentPhotos = photoError ? [] : (photos || []);
+await loadExistingFavorites();
+
+if(!currentPhotos.length && !currentAlbums.length){
 grid.innerHTML = `<div class="empty">No photos have been uploaded yet.</div>`;
+updateCartUI();
 return;
 }
 
-currentPhotos = photos;
-await loadExistingFavorites();
 renderGallery();
 updateCartUI();
 }
@@ -925,11 +973,42 @@ const { data } = await supabaseClient
 updateFavoriteCount();
 }
 
-function renderGallery(){
-const grid = document.getElementById("photoGrid");
-grid.innerHTML = "";
+function renderPurchaseAlbums(){
+const albumSection = document.getElementById("albumSection");
+const fullPrice = Number(currentGallery?.full_gallery_price || 0);
 
-currentPhotos.forEach((photo, index) => {
+albumSection.innerHTML = "";
+
+if(fullPrice > 0){
+const fullCard = document.createElement("div");
+fullCard.className = "album-card";
+fullCard.innerHTML = `
+<h3>Full Gallery Download</h3>
+<p>Purchase the full edited gallery package when available.</p>
+<div class="album-price">$${fullPrice.toFixed(2)}</div>
+<button onclick="addFullGallery()">Add Full Gallery</button>
+`;
+albumSection.appendChild(fullCard);
+}
+
+currentAlbums.forEach(album => {
+const price = Number(album.album_price || 0);
+const card = document.createElement("div");
+card.className = "album-card";
+card.innerHTML = `
+<h3>${album.album_name || "Photo Album"}</h3>
+<p>${album.album_description || "A curated album from this gallery."}</p>
+<div class="album-price">${price > 0 ? "$" + price.toFixed(2) : "Request pricing"}</div>
+${price > 0 ? `<button onclick="addAlbumToCart('${album.id}')">Purchase Album</button>` : `<button onclick="requestAlbumInfo('${album.id}')">Ask About This Album</button>`}
+`;
+albumSection.appendChild(card);
+});
+
+albumSection.style.display = (fullPrice > 0 || currentAlbums.length) ? "grid" : "none";
+}
+
+function buildPhotoCard(photo){
+const index = currentPhotos.findIndex(p => p.id === photo.id);
 const showWatermark = photo.is_approved !== true && photo.watermark_enabled !== false;
 const isFav = favorites.has(photo.id);
 const price = Number(photo.price || 0);
@@ -958,8 +1037,76 @@ ${price > 0 ? `<button class="download" onclick="addToCart('${photo.id}')">Add t
 </div>
 `;
 
-grid.appendChild(card);
+return card;
+}
+
+function renderPhotoSection({title, description, priceText, buttonHtml, photos}){
+const section = document.createElement("div");
+section.className = "photo-section";
+
+section.innerHTML = `
+<div class="photo-section-head">
+<h3>${title}</h3>
+<p>${description}</p>
+<div class="photo-section-actions">
+${priceText ? `<div class="photo-section-price">${priceText}</div>` : `<div></div>`}
+<div class="actions">${buttonHtml || ""}</div>
+</div>
+</div>
+`;
+
+const grid = document.createElement("div");
+grid.className = "album-photo-grid";
+
+if(!photos.length){
+grid.innerHTML = `<div class="album-empty">No photos have been added to this album yet.</div>`;
+}else{
+photos.forEach(photo => grid.appendChild(buildPhotoCard(photo)));
+}
+
+section.appendChild(grid);
+return section;
+}
+
+function renderGallery(){
+const grid = document.getElementById("photoGrid");
+grid.innerHTML = "";
+
+const groupedPhotoIds = new Set();
+
+currentAlbums.forEach(album => {
+const albumPhotos = currentPhotos.filter(photo => photo.album_id === album.id);
+albumPhotos.forEach(photo => groupedPhotoIds.add(photo.id));
+
+const price = Number(album.album_price || 0);
+const buttonHtml = price > 0
+? `<button onclick="addAlbumToCart('${album.id}')">Purchase Album</button>`
+: `<button class="secondary" onclick="requestAlbumInfo('${album.id}')">Ask About This Album</button>`;
+
+const section = renderPhotoSection({
+title: album.album_name || "Photo Album",
+description: album.album_description || "A curated album from this session. Photos included in this album are shown below.",
+priceText: price > 0 ? "$" + price.toFixed(2) : "Request pricing",
+buttonHtml,
+photos: albumPhotos
 });
+
+grid.appendChild(section);
+});
+
+const ungroupedPhotos = currentPhotos.filter(photo => !photo.album_id || !groupedPhotoIds.has(photo.id));
+
+if(ungroupedPhotos.length || !currentAlbums.length){
+const section = renderPhotoSection({
+title: currentAlbums.length ? "Individual Photos" : "Gallery Photos",
+description: currentAlbums.length ? "These photos are available outside of a specific album." : "Browse your private proofing gallery below.",
+priceText: "",
+buttonHtml: "",
+photos: ungroupedPhotos
+});
+
+grid.appendChild(section);
+}
 }
 
 async function toggleFavorite(photoId){
@@ -1081,6 +1228,62 @@ price
 });
 
 updateCartUI();
+}
+
+
+function addAlbumToCart(albumId){
+if(!requireClientInfo()) return;
+
+const album = currentAlbums.find(a => a.id === albumId);
+if(!album) return;
+
+const price = Number(album.album_price || 0);
+
+if(price <= 0){
+alert("This album does not have a purchase price set yet.");
+return;
+}
+
+if(cart.some(item => item.id === "album_" + albumId)){
+alert("This album is already in your cart.");
+return;
+}
+
+cart.push({
+id: "album_" + albumId,
+photo_id: null,
+type: "album",
+album_id: albumId,
+caption: album.album_name || "Photo Album",
+price
+});
+
+updateCartUI();
+}
+
+async function requestAlbumInfo(albumId){
+if(!requireClientInfo()) return;
+
+const album = currentAlbums.find(a => a.id === albumId);
+if(!album || !currentGallery) return;
+
+const { error } = await supabaseClient
+.from("gallery_requests")
+.insert([{
+gallery_id: currentGallery.id,
+photo_id: null,
+client_name: getClientName(),
+client_email: getClientEmail(),
+request_type: "Album Purchase Inquiry",
+message: "Client asked about album: " + (album.album_name || "Photo Album")
+}]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+alert("Album request sent successfully.");
 }
 
 function addAlbumPackage(){
@@ -1232,6 +1435,7 @@ document.getElementById("accessBox").style.display = "block";
 document.getElementById("codeInput").value = "";
 currentGallery = null;
 currentPhotos = [];
+currentAlbums = [];
 favorites.clear();
 cart = [];
 }
