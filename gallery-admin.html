@@ -1125,7 +1125,10 @@ const caption = document.getElementById("caption").value.trim();
 const price = parseFloat(document.getElementById("photoPrice").value || "0");
 const isApproved = document.getElementById("approvedUpload").value === "true";
 const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
-const albumId = document.getElementById("uploadAlbumSelect").value || null;
+const albumSelect = document.getElementById("uploadAlbumSelect");
+const albumId = albumSelect && albumSelect.value
+  ? albumSelect.value
+  : null;
 const msg = document.getElementById("uploadMessage");
 
 msg.textContent = "";
