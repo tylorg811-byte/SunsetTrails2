@@ -248,6 +248,59 @@ flex-wrap:wrap;
 margin-top:12px;
 }
 
+.mode-tabs{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+margin:16px 0;
+}
+
+.mode-tab{
+background:rgba(255,255,255,.09);
+color:white;
+border:1px solid rgba(255,255,255,.18);
+box-shadow:none;
+border-radius:18px;
+padding:16px 12px;
+text-align:left;
+}
+
+.mode-tab strong{
+display:block;
+color:#ffd38a;
+font-size:15px;
+margin-bottom:4px;
+}
+
+.mode-tab span{
+display:block;
+color:#f3d9b9;
+font-size:12px;
+line-height:1.35;
+}
+
+.mode-tab.active{
+background:linear-gradient(135deg,rgba(255,211,138,.24),rgba(199,123,40,.18));
+border-color:rgba(255,211,138,.52);
+}
+
+.mode-panel{
+display:none;
+}
+
+.mode-panel.active{
+display:block;
+}
+
+.helper-box{
+background:rgba(255,255,255,.055);
+border:1px solid rgba(255,211,138,.14);
+border-radius:18px;
+padding:16px;
+color:#f3d9b9;
+line-height:1.55;
+font-size:14px;
+}
 
 .album-tools{
 display:grid;
@@ -455,7 +508,7 @@ grid-template-columns:1fr 1fr;
 
 @media(max-width:1000px){
 .stats{grid-template-columns:repeat(2,1fr)}
-.grid,.three-grid,.gallery-list,.list,.album-tools,.album-list{grid-template-columns:1fr}
+.grid,.three-grid,.gallery-list,.list,.album-tools,.album-list,.mode-tabs{grid-template-columns:1fr}
 .viewer-edit .grid{grid-template-columns:1fr}
 }
 
@@ -485,7 +538,7 @@ header{padding:16px 5%}
 
 <section id="loginPanel" class="panel">
 <h1>Gallery Admin</h1>
-<p class="sub">Manage client galleries, full album pricing, proof photos, favorites, print requests, PayPal orders, and photo pricing.</p>
+<p class="sub">Create client galleries, upload individual photos or albums, manage favorites, requests, PayPal orders, and photo pricing.</p>
 
 <div class="field">
 <label>Email</label>
@@ -504,7 +557,7 @@ header{padding:16px 5%}
 <section id="adminPanel" class="admin">
 
 <h1>Admin Console</h1>
-<p class="sub">Upload proofs, set album pricing, approve finals, control watermarks, edit prices, and clear finished requests.</p>
+<p class="sub">Create clients separately, then upload individual photos or create albums during photo upload.</p>
 
 <div class="stats">
 <div class="stat"><strong id="statGalleries">0</strong><span>Galleries</span></div>
@@ -540,20 +593,18 @@ header{padding:16px 5%}
 </div>
 </div>
 
-<div class="three-grid">
+<div class="grid">
 <div class="field">
 <label>Full Gallery Price</label>
 <input id="fullGalleryPrice" type="number" step="0.01" placeholder="150.00">
 </div>
 
 <div class="field">
-<label>Album Package Name</label>
-<input id="albumName" placeholder="Premium Album Package">
-</div>
-
-<div class="field">
-<label>Album Package Price</label>
-<input id="albumPrice" type="number" step="0.01" placeholder="75.00">
+<label>Gallery Status</label>
+<select id="galleryActive">
+<option value="true">Active / Client Can View</option>
+<option value="false">Inactive / Hidden From Client</option>
+</select>
 </div>
 </div>
 
@@ -575,27 +626,50 @@ header{padding:16px 5%}
 </div>
 
 <div class="panel" style="padding:18px;margin-bottom:16px;background:rgba(255,211,138,.055);">
-<h2 style="font-size:26px;">Album Options For This Upload</h2>
-<p class="album-note">Create an album here before uploading, select an existing album, or leave it on individual photos.</p>
+<h2 style="font-size:26px;">Where Should These Photos Go?</h2>
+<p class="album-note">Choose one upload type. Albums are created right here while uploading, not when creating the client.</p>
 
-<div class="grid" style="margin-top:14px;">
-<div class="field">
-<label>Upload Into Album</label>
-<select id="uploadAlbumSelect">
-<option value="">Individual photos / No album</option>
-</select>
+<div class="mode-tabs">
+<button type="button" class="mode-tab active" id="modeIndividualBtn" onclick="setUploadMode('individual')">
+<strong>Individual Photos</strong>
+<span>Upload loose photos with no album attached.</span>
+</button>
+
+<button type="button" class="mode-tab" id="modeExistingBtn" onclick="setUploadMode('existing')">
+<strong>Existing Album</strong>
+<span>Add photos into an album you already created.</span>
+</button>
+
+<button type="button" class="mode-tab" id="modeCreateBtn" onclick="setUploadMode('create')">
+<strong>Create Album</strong>
+<span>Create the album and upload photos into it in one step.</span>
+</button>
 </div>
 
+<div class="mode-panel active" id="individualModePanel">
+<div class="helper-box">These photos will appear as individual photos in the client gallery and will not be attached to an album.</div>
+</div>
+
+<div class="mode-panel" id="existingModePanel">
+<div class="field">
+<label>Choose Existing Album</label>
+<select id="uploadAlbumSelect">
+<option value="">Choose an album</option>
+</select>
+</div>
+</div>
+
+<div class="mode-panel" id="createModePanel">
+<div class="grid">
 <div class="field">
 <label>New Album Name</label>
 <input id="newAlbumName" placeholder="Smith Wedding Album / Family Favorites">
 </div>
-</div>
 
-<div class="grid">
 <div class="field">
 <label>New Album Price</label>
 <input id="newAlbumPrice" type="number" step="0.01" placeholder="75.00">
+</div>
 </div>
 
 <div class="field">
@@ -604,7 +678,6 @@ header{padding:16px 5%}
 </div>
 </div>
 
-<button onclick="createAlbumForUpload()">Create Album For This Upload</button>
 <div class="message" id="albumMessage"></div>
 </div>
 
@@ -743,6 +816,7 @@ let currentPhotos = [];
 let currentPhotoIndex = 0;
 let currentGalleryId = null;
 let albumCache = {};
+let uploadMode = "individual";
 
 window.addEventListener("load", async () => {
 const { data } = await supabaseClient.auth.getSession();
@@ -812,8 +886,7 @@ const gallery_code = document.getElementById("galleryCode").value.trim().toUpper
 const package_name = document.getElementById("packageName").value.trim();
 const payment_link = document.getElementById("paymentLink").value.trim();
 const full_gallery_price = parseFloat(document.getElementById("fullGalleryPrice").value || "0");
-const album_name = document.getElementById("albumName").value.trim() || "Album Package";
-const album_price = parseFloat(document.getElementById("albumPrice").value || "0");
+const is_active = document.getElementById("galleryActive").value === "true";
 const notes = document.getElementById("notes").value.trim();
 const msg = document.getElementById("createMessage");
 
@@ -832,8 +905,7 @@ gallery_code,
 package_name,
 payment_link,
 full_gallery_price: full_gallery_price || 0,
-album_name,
-album_price: album_price || 0,
+is_active,
 notes
 }]);
 
@@ -849,8 +921,7 @@ document.getElementById("galleryCode").value = "";
 document.getElementById("packageName").value = "";
 document.getElementById("paymentLink").value = "";
 document.getElementById("fullGalleryPrice").value = "";
-document.getElementById("albumName").value = "";
-document.getElementById("albumPrice").value = "";
+document.getElementById("galleryActive").value = "true";
 document.getElementById("notes").value = "";
 
 await loadGalleries();
@@ -894,13 +965,13 @@ card.innerHTML = `
 <span class="code">${gallery.gallery_code}</span>
 <p>${gallery.notes || ""}</p>
 <p><b>Full Gallery:</b> $${Number(gallery.full_gallery_price || 0).toFixed(2)}</p>
-<p><b>${gallery.album_name || "Album Package"}:</b> $${Number(gallery.album_price || 0).toFixed(2)}</p>
+<p><b>Status:</b> ${gallery.is_active === false ? "Inactive / Hidden" : "Active / Client Can View"}</p>
 
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
 <button class="secondary" onclick="viewAlbums('${gallery.id}')">Manage Albums</button>
-<button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Gallery Pricing</button>
+<button class="secondary" onclick="editGallery('${gallery.id}')">Edit Gallery</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
 
@@ -913,13 +984,36 @@ list.appendChild(card);
 }
 
 
+function setUploadMode(mode){
+uploadMode = mode;
+
+["Individual","Existing","Create"].forEach(name => {
+const btn = document.getElementById("mode" + name + "Btn");
+if(btn) btn.classList.remove("active");
+});
+
+["individual","existing","create"].forEach(name => {
+const panel = document.getElementById(name + "ModePanel");
+if(panel) panel.classList.remove("active");
+});
+
+const activeBtn = document.getElementById("mode" + mode.charAt(0).toUpperCase() + mode.slice(1) + "Btn");
+const activePanel = document.getElementById(mode + "ModePanel");
+
+if(activeBtn) activeBtn.classList.add("active");
+if(activePanel) activePanel.classList.add("active");
+
+const msg = document.getElementById("albumMessage");
+if(msg) msg.textContent = "";
+}
+
 async function loadUploadAlbums(galleryId){
 const select = document.getElementById("uploadAlbumSelect");
 const msg = document.getElementById("albumMessage");
 
 if(!select) return;
 
-select.innerHTML = `<option value="">Individual photos / No album</option>`;
+select.innerHTML = `<option value="">Choose an album</option>`;
 
 if(!galleryId) return;
 
@@ -945,23 +1039,23 @@ select.appendChild(opt);
 });
 }
 
-async function createAlbumForUpload(){
+async function createAlbumForUpload(silent = false){
 const galleryId = document.getElementById("gallerySelect").value;
 const album_name = document.getElementById("newAlbumName").value.trim();
 const album_price = parseFloat(document.getElementById("newAlbumPrice").value || "0");
 const album_description = document.getElementById("newAlbumDescription").value.trim();
 const msg = document.getElementById("albumMessage");
 
-msg.textContent = "";
+if(msg) msg.textContent = "";
 
 if(!galleryId){
-msg.textContent = "Choose a gallery first.";
-return;
+if(msg) msg.textContent = "Choose a gallery first.";
+return null;
 }
 
 if(!album_name){
-msg.textContent = "Enter an album name.";
-return;
+if(msg) msg.textContent = "Enter an album name.";
+return null;
 }
 
 const { data, error } = await supabaseClient
@@ -976,13 +1070,9 @@ album_description: album_description || ""
 .single();
 
 if(error){
-msg.textContent = error.message;
-return;
+if(msg) msg.textContent = error.message;
+return null;
 }
-
-document.getElementById("newAlbumName").value = "";
-document.getElementById("newAlbumPrice").value = "";
-document.getElementById("newAlbumDescription").value = "";
 
 await loadUploadAlbums(galleryId);
 
@@ -991,7 +1081,11 @@ if(select && data && data.id){
 select.value = String(data.id);
 }
 
-msg.textContent = "Album created and selected. Now choose photos and click Upload Photos.";
+if(!silent && msg){
+msg.textContent = "Album created. Choose photos and click Upload Photos.";
+}
+
+return data;
 }
 
 async function viewAlbums(galleryId){
@@ -1168,25 +1262,21 @@ box.appendChild(div);
 }
 
 
-async function editGalleryPricing(galleryId){
+async function editGallery(galleryId){
 const gallery = allGalleries.find(g => g.id === galleryId);
 if(!gallery) return;
 
 const fullPrice = prompt("Full gallery price:", Number(gallery.full_gallery_price || 0).toFixed(2));
 if(fullPrice === null) return;
 
-const albumName = prompt("Album package name:", gallery.album_name || "Album Package");
-if(albumName === null) return;
-
-const albumPrice = prompt("Album package price:", Number(gallery.album_price || 0).toFixed(2));
-if(albumPrice === null) return;
+const status = prompt("Gallery active? Type yes or no:", gallery.is_active === false ? "no" : "yes");
+if(status === null) return;
 
 const { error } = await supabaseClient
 .from("client_galleries")
 .update({
 full_gallery_price: parseFloat(fullPrice || "0") || 0,
-album_name: albumName || "Album Package",
-album_price: parseFloat(albumPrice || "0") || 0
+is_active: String(status).trim().toLowerCase() !== "no"
 })
 .eq("id", galleryId);
 
@@ -1211,11 +1301,10 @@ const price = parseFloat(document.getElementById("photoPrice").value || "0");
 const isApproved = document.getElementById("approvedUpload").value === "true";
 const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
 const msg = document.getElementById("uploadMessage");
-
-const albumSelect = document.getElementById("uploadAlbumSelect");
-let albumId = albumSelect && albumSelect.value ? String(albumSelect.value).trim() : "";
+const albumMsg = document.getElementById("albumMessage");
 
 msg.textContent = "";
+if(albumMsg) albumMsg.textContent = "";
 
 if(!galleryId){
 msg.textContent = "Choose a gallery first.";
@@ -1227,13 +1316,27 @@ msg.textContent = "Choose at least one photo.";
 return;
 }
 
-/*
-IMPORTANT:
-Only send album_id if Supabase confirms that exact album exists
-inside the selected gallery. If the dropdown ever has a stale/bad value,
-this safely uploads as individual photos instead of breaking with a
-foreign key error.
-*/
+let albumId = null;
+
+if(uploadMode === "existing"){
+const albumSelect = document.getElementById("uploadAlbumSelect");
+albumId = albumSelect && albumSelect.value ? String(albumSelect.value).trim() : "";
+
+if(!albumId){
+msg.textContent = "Choose an existing album, or switch to Individual Photos.";
+return;
+}
+}
+
+if(uploadMode === "create"){
+const createdAlbum = await createAlbumForUpload(true);
+if(!createdAlbum || !createdAlbum.id){
+msg.textContent = "Create Album mode needs an album name before uploading.";
+return;
+}
+albumId = String(createdAlbum.id);
+}
+
 if(albumId){
 const { data: albumCheck, error: albumError } = await supabaseClient
 .from("photo_albums")
@@ -1243,13 +1346,9 @@ const { data: albumCheck, error: albumError } = await supabaseClient
 .maybeSingle();
 
 if(albumError || !albumCheck){
-console.warn("Invalid album selection ignored:", albumId, albumError);
-albumId = null;
-msg.textContent = "Album selection was invalid, so this upload will be saved as individual photos.";
-await new Promise(resolve => setTimeout(resolve, 700));
+msg.textContent = "That album does not belong to this gallery. Refresh, select the gallery again, and retry.";
+return;
 }
-}else{
-albumId = null;
 }
 
 msg.textContent = "Uploading...";
@@ -1308,6 +1407,16 @@ return;
 document.getElementById("photoFiles").value = "";
 document.getElementById("caption").value = "";
 document.getElementById("photoPrice").value = "";
+
+if(uploadMode === "create"){
+document.getElementById("newAlbumName").value = "";
+document.getElementById("newAlbumPrice").value = "";
+document.getElementById("newAlbumDescription").value = "";
+await loadUploadAlbums(galleryId);
+setUploadMode("existing");
+const select = document.getElementById("uploadAlbumSelect");
+if(select && albumId) select.value = albumId;
+}
 
 msg.textContent = albumId ? "Uploaded successfully into album." : "Uploaded successfully as individual photos.";
 
