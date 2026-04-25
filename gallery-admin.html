@@ -539,21 +539,9 @@ header{padding:16px 5%}
 </div>
 </div>
 
-<div class="three-grid">
 <div class="field">
 <label>Full Gallery Price</label>
 <input id="fullGalleryPrice" type="number" step="0.01" placeholder="150.00">
-</div>
-
-<div class="field">
-<label>Album Package Name</label>
-<input id="albumName" placeholder="Premium Album Package">
-</div>
-
-<div class="field">
-<label>Album Package Price</label>
-<input id="albumPrice" type="number" step="0.01" placeholder="75.00">
-</div>
 </div>
 
 <div class="field">
@@ -573,37 +561,38 @@ header{padding:16px 5%}
 <select id="gallerySelect"></select>
 </div>
 
-<div class="panel" style="padding:18px;margin-bottom:16px;background:rgba(255,211,138,.055);">
-<h2 style="font-size:26px;">Album Options For This Upload</h2>
-<p class="album-note">Choose an existing album, create a new album before uploading, or leave this set to individual photos.</p>
+<div class="panel" style="padding:20px;margin-bottom:18px;background:rgba(255,211,138,.075);border:1px solid rgba(255,211,138,.28);">
+<h2 style="font-size:28px;">Upload Into An Album</h2>
+<p class="album-note">This is where albums are created and where photos are assigned. Create an album here, then it will automatically be selected for the photos you upload below. Leave the dropdown on “Individual photos / No album” when you do not want the photos inside an album.</p>
 
-<div class="grid" style="margin-top:14px;">
-<div class="field">
-<label>Upload Into Album</label>
+<div class="field" style="margin-top:14px;">
+<label>Step 1 — Choose Existing Album Or Individual Upload</label>
 <select id="uploadAlbumSelect">
 <option value="">Individual photos / No album</option>
 </select>
 </div>
 
+<div class="grid">
 <div class="field">
-<label>New Album Name</label>
+<label>Step 2 — New Album Name</label>
 <input id="newAlbumName" placeholder="Smith Wedding Album / Family Favorites">
 </div>
-</div>
 
-<div class="grid">
 <div class="field">
 <label>New Album Price</label>
 <input id="newAlbumPrice" type="number" step="0.01" placeholder="75.00">
+</div>
 </div>
 
 <div class="field">
 <label>New Album Description</label>
 <input id="newAlbumDescription" placeholder="A curated album package from this session.">
 </div>
-</div>
 
-<button onclick="createAlbumForUpload()">Create Album For This Upload</button>
+<div class="actions">
+<button onclick="createAlbumForUpload()">Create Album + Select It</button>
+<button class="secondary" onclick="loadUploadAlbums(document.getElementById('gallerySelect').value)">Refresh Album List</button>
+</div>
 <div class="message" id="albumMessage"></div>
 </div>
 
@@ -810,8 +799,6 @@ const gallery_code = document.getElementById("galleryCode").value.trim().toUpper
 const package_name = document.getElementById("packageName").value.trim();
 const payment_link = document.getElementById("paymentLink").value.trim();
 const full_gallery_price = parseFloat(document.getElementById("fullGalleryPrice").value || "0");
-const album_name = document.getElementById("albumName").value.trim() || "Album Package";
-const album_price = parseFloat(document.getElementById("albumPrice").value || "0");
 const notes = document.getElementById("notes").value.trim();
 const msg = document.getElementById("createMessage");
 
@@ -830,8 +817,6 @@ gallery_code,
 package_name,
 payment_link,
 full_gallery_price: full_gallery_price || 0,
-album_name,
-album_price: album_price || 0,
 notes
 }]);
 
@@ -847,8 +832,6 @@ document.getElementById("galleryCode").value = "";
 document.getElementById("packageName").value = "";
 document.getElementById("paymentLink").value = "";
 document.getElementById("fullGalleryPrice").value = "";
-document.getElementById("albumName").value = "";
-document.getElementById("albumPrice").value = "";
 document.getElementById("notes").value = "";
 
 await loadGalleries();
@@ -892,13 +875,13 @@ card.innerHTML = `
 <span class="code">${gallery.gallery_code}</span>
 <p>${gallery.notes || ""}</p>
 <p><b>Full Gallery:</b> $${Number(gallery.full_gallery_price || 0).toFixed(2)}</p>
-<p><b>${gallery.album_name || "Album Package"}:</b> $${Number(gallery.album_price || 0).toFixed(2)}</p>
+<p style="margin-top:6px;"><b>Albums:</b> Create and assign albums inside the Upload Photos panel.</p>
 
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
 <button class="secondary" onclick="viewAlbums('${gallery.id}')">Manage Albums</button>
-<button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Gallery Pricing</button>
+<button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Full Gallery Price</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
 
@@ -1115,18 +1098,10 @@ if(!gallery) return;
 const fullPrice = prompt("Full gallery price:", Number(gallery.full_gallery_price || 0).toFixed(2));
 if(fullPrice === null) return;
 
-const albumName = prompt("Album package name:", gallery.album_name || "Album Package");
-if(albumName === null) return;
-
-const albumPrice = prompt("Album package price:", Number(gallery.album_price || 0).toFixed(2));
-if(albumPrice === null) return;
-
 const { error } = await supabaseClient
 .from("client_galleries")
 .update({
-full_gallery_price: parseFloat(fullPrice || "0") || 0,
-album_name: albumName || "Album Package",
-album_price: parseFloat(albumPrice || "0") || 0
+full_gallery_price: parseFloat(fullPrice || "0") || 0
 })
 .eq("id", galleryId);
 
