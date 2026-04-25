@@ -1125,11 +1125,10 @@ const caption = document.getElementById("caption").value.trim();
 const price = parseFloat(document.getElementById("photoPrice").value || "0");
 const isApproved = document.getElementById("approvedUpload").value === "true";
 const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
-const albumSelect = document.getElementById("uploadAlbumSelect");
-const albumId = albumSelect && albumSelect.value
-  ? albumSelect.value
-  : null;
 const msg = document.getElementById("uploadMessage");
+
+const albumSelect = document.getElementById("uploadAlbumSelect");
+let albumId = albumSelect ? albumSelect.value.trim() : "";
 
 msg.textContent = "";
 
@@ -1141,6 +1140,23 @@ return;
 if(!files.length){
 msg.textContent = "Choose at least one photo.";
 return;
+}
+
+/* IMPORTANT: verify album exists before saving it */
+if(albumId){
+const { data: albumCheck, error: albumError } = await supabaseClient
+.from("photo_albums")
+.select("id")
+.eq("id", albumId)
+.eq("gallery_id", galleryId)
+.maybeSingle();
+
+if(albumError || !albumCheck){
+msg.textContent = "That album selection is invalid. Refresh the page, select the album again, and upload.";
+return;
+}
+}else{
+albumId = null;
 }
 
 msg.textContent = "Uploading...";
@@ -1172,18 +1188,23 @@ const { data: publicData } = supabaseClient.storage
 .from("gallery-photos")
 .getPublicUrl(filePath);
 
+const photoRow = {
+gallery_id: galleryId,
+image_url: publicData.publicUrl,
+file_path: filePath,
+caption: caption || "Sunset Trails Photography",
+is_approved: isApproved,
+watermark_enabled: watermarkEnabled,
+price: price || 0
+};
+
+if(albumId){
+photoRow.album_id = albumId;
+}
+
 const { error: dbError } = await supabaseClient
 .from("gallery_photos")
-.insert([{
-gallery_id:galleryId,
-image_url:publicData.publicUrl,
-file_path:filePath,
-caption:caption || "Sunset Trails Photography",
-is_approved:isApproved,
-watermark_enabled:watermarkEnabled,
-price:price || 0,
-album_id:albumId
-}]);
+.insert([photoRow]);
 
 if(dbError){
 msg.textContent = dbError.message;
@@ -1195,7 +1216,7 @@ document.getElementById("photoFiles").value = "";
 document.getElementById("caption").value = "";
 document.getElementById("photoPrice").value = "";
 
-msg.textContent = "Uploaded successfully.";
+msg.textContent = albumId ? "Uploaded successfully into album." : "Uploaded successfully as individual photos.";
 
 const box = document.getElementById("photos-" + galleryId);
 if(box){
