@@ -27,6 +27,9 @@ align-items:center;
 background:rgba(20,12,5,.58);
 backdrop-filter:blur(18px);
 border-bottom:1px solid rgba(255,204,120,.18);
+position:sticky;
+top:0;
+z-index:50;
 }
 
 .logo{
@@ -172,59 +175,97 @@ flex-wrap:wrap;
 margin-top:12px;
 }
 
-.photos{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-margin-top:18px;
-}
-
-.photo{
-border-radius:16px;
-overflow:hidden;
-background:rgba(255,255,255,.08);
-border:1px solid rgba(255,255,255,.12);
-}
-
-.photo img{
-width:100%;
-height:170px;
-object-fit:cover;
-display:block;
-background:#201711;
-}
-
-.photo button{
-width:100%;
-border-radius:0;
-padding:11px;
-font-size:13px;
-}
-
 .message{
 margin-top:14px;
 color:#ffd38a;
 font-weight:700;
 }
 
+.photo-viewer{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.93);
+z-index:9999;
+display:none;
+align-items:center;
+justify-content:center;
+padding:30px;
+}
+
+.viewer-box{
+max-width:92%;
+max-height:90vh;
+text-align:center;
+}
+
+.viewer-box img{
+max-width:100%;
+max-height:82vh;
+object-fit:contain;
+border-radius:22px;
+box-shadow:0 30px 90px rgba(0,0,0,.6);
+}
+
+.viewer-box p{
+margin-top:14px;
+color:#ffd38a;
+font-weight:800;
+}
+
+.viewer-close{
+position:absolute;
+top:22px;
+right:30px;
+font-size:46px;
+color:white;
+cursor:pointer;
+z-index:10001;
+}
+
+.viewer-arrow{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+width:58px;
+height:58px;
+border-radius:50%;
+font-size:46px;
+line-height:1;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(255,211,138,.18);
+color:#ffd38a;
+border:1px solid rgba(255,211,138,.35);
+box-shadow:none;
+z-index:10000;
+}
+
+.viewer-arrow.left{left:28px}
+.viewer-arrow.right{right:28px}
+
+.viewer-delete{
+margin-top:16px;
+}
+
 @media(max-width:900px){
-.grid,.gallery-list{
-grid-template-columns:1fr;
-}
-.photos{
-grid-template-columns:repeat(2,1fr);
-}
+.grid,.gallery-list{grid-template-columns:1fr}
 }
 
 @media(max-width:600px){
-.container{
-padding:35px 5%;
+.container{padding:35px 5%}
+header{padding:18px 5%}
+.viewer-arrow{
+width:46px;
+height:46px;
+font-size:36px;
 }
-header{
-padding:18px 5%;
-}
-.photos{
-grid-template-columns:1fr;
+.viewer-arrow.left{left:10px}
+.viewer-arrow.right{right:10px}
+.viewer-close{
+top:14px;
+right:20px;
+font-size:40px;
 }
 }
 </style>
@@ -332,6 +373,20 @@ grid-template-columns:1fr;
 
 </div>
 
+<div id="photoViewer" class="photo-viewer">
+<span class="viewer-close" onclick="closePhotoViewer()">×</span>
+
+<button class="viewer-arrow left" onclick="prevPhoto()">‹</button>
+
+<div class="viewer-box" id="viewerBox">
+<img id="viewerImg" src="">
+<p id="viewerCount"></p>
+<button class="danger viewer-delete" onclick="deleteCurrentPhoto()">Delete This Photo</button>
+</div>
+
+<button class="viewer-arrow right" onclick="nextPhoto()">›</button>
+</div>
+
 <script>
 const SUPABASE_URL = "https://mcjqykkjyvhcqlfjwzpo.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8";
@@ -339,6 +394,11 @@ const SUPABASE_ANON_KEY = "sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allGalleries = [];
+let currentPhotos = [];
+let currentPhotoIndex = 0;
+let currentGalleryId = null;
+let touchStartX = 0;
+let touchEndX = 0;
 
 window.addEventListener("load", async () => {
 const { data } = await supabaseClient.auth.getSession();
@@ -354,6 +414,11 @@ const password = document.getElementById("password").value.trim();
 const msg = document.getElementById("loginMessage");
 
 msg.textContent = "";
+
+if(!email || !password){
+msg.textContent = "Please enter your email and password.";
+return;
+}
 
 const { error } = await supabaseClient.auth.signInWithPassword({
 email,
@@ -476,8 +541,6 @@ card.innerHTML = `
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
-
-<div class="photos" id="photos-${gallery.id}"></div>
 `;
 
 list.appendChild(card);
@@ -491,7 +554,7 @@ alert("Copied: " + code);
 
 async function uploadPhotos(){
 const galleryId = document.getElementById("gallerySelect").value;
-const files = document.getElementById("photoFiles").files;
+const files = Array.from(document.getElementById("photoFiles").files || []);
 const caption = document.getElementById("caption").value.trim();
 const msg = document.getElementById("uploadMessage");
 
@@ -512,21 +575,22 @@ msg.textContent = "Uploading photos... Please wait.";
 for(const file of files){
 
 if(!file || file.size === 0){
-msg.textContent = "One of the selected files is empty. Please choose a real image file.";
+msg.textContent = "One selected file is empty. Try a normal JPG or PNG image.";
 return;
 }
 
-const fileExt = file.name.split(".").pop().toLowerCase();
-const cleanExt = fileExt || "jpg";
+const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
+const filePath = `${galleryId}/${crypto.randomUUID()}.${fileExt}`;
+const bytes = new Uint8Array(await file.arrayBuffer());
 
-const safeFileName = `${galleryId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${cleanExt}`;
-
-const arrayBuffer = await file.arrayBuffer();
-const blob = new Blob([arrayBuffer], { type: file.type || "image/jpeg" });
+if(!bytes.length){
+msg.textContent = "This image could not be read. Try saving/exporting it again.";
+return;
+}
 
 const { error: uploadError } = await supabaseClient.storage
 .from("gallery-photos")
-.upload(safeFileName, blob, {
+.upload(filePath, bytes, {
 contentType: file.type || "image/jpeg",
 cacheControl: "3600",
 upsert: false
@@ -539,16 +603,14 @@ return;
 
 const { data: publicData } = supabaseClient.storage
 .from("gallery-photos")
-.getPublicUrl(safeFileName);
-
-const publicUrl = publicData.publicUrl;
+.getPublicUrl(filePath);
 
 const { error: dbError } = await supabaseClient
 .from("gallery_photos")
 .insert([{
 gallery_id: galleryId,
-image_url: publicUrl,
-file_path: safeFileName,
+image_url: publicData.publicUrl,
+file_path: filePath,
 caption: caption || "Sunset Trails Photography"
 }]);
 
@@ -560,16 +622,14 @@ return;
 
 document.getElementById("photoFiles").value = "";
 document.getElementById("caption").value = "";
-
 msg.textContent = "Photos uploaded successfully.";
 
 await viewPhotos(galleryId);
 }
 
-let currentPhotos = [];
-let currentPhotoIndex = 0;
-
 async function viewPhotos(galleryId){
+currentGalleryId = galleryId;
+
 const { data, error } = await supabaseClient
 .from("gallery_photos")
 .select("*")
@@ -592,6 +652,8 @@ openPhotoViewer();
 }
 
 function openPhotoViewer(){
+if(!currentPhotos.length) return;
+
 const photo = currentPhotos[currentPhotoIndex];
 
 document.getElementById("viewerImg").src = photo.image_url;
@@ -606,6 +668,8 @@ document.getElementById("photoViewer").style.display = "none";
 }
 
 function nextPhoto(){
+if(!currentPhotos.length) return;
+
 currentPhotoIndex++;
 
 if(currentPhotoIndex >= currentPhotos.length){
@@ -616,6 +680,8 @@ openPhotoViewer();
 }
 
 function prevPhoto(){
+if(!currentPhotos.length) return;
+
 currentPhotoIndex--;
 
 if(currentPhotoIndex < 0){
@@ -625,39 +691,34 @@ currentPhotoIndex = currentPhotos.length - 1;
 openPhotoViewer();
 }
 
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No photos uploaded yet.</p>`;
-return;
-}
+async function deleteCurrentPhoto(){
+if(!currentPhotos.length) return;
 
-box.innerHTML = "";
+const photo = currentPhotos[currentPhotoIndex];
 
-data.forEach(photo => {
-const div = document.createElement("div");
-div.className = "photo";
-
-div.innerHTML = `
-<img src="${photo.image_url}" alt="Gallery photo">
-<button class="danger" onclick="deletePhoto('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
-`;
-
-box.appendChild(div);
-});
-}
-
-async function deletePhoto(photoId, filePath, galleryId){
 if(!confirm("Delete this photo?")) return;
 
 await supabaseClient.storage
 .from("gallery-photos")
-.remove([filePath]);
+.remove([photo.file_path]);
 
 await supabaseClient
 .from("gallery_photos")
 .delete()
-.eq("id", photoId);
+.eq("id", photo.id);
 
-await viewPhotos(galleryId);
+currentPhotos.splice(currentPhotoIndex, 1);
+
+if(!currentPhotos.length){
+closePhotoViewer();
+return;
+}
+
+if(currentPhotoIndex >= currentPhotos.length){
+currentPhotoIndex = currentPhotos.length - 1;
+}
+
+openPhotoViewer();
 }
 
 async function deleteGallery(galleryId){
@@ -680,6 +741,37 @@ await supabaseClient
 .eq("id", galleryId);
 
 await loadGalleries();
+}
+
+document.addEventListener("keydown", e => {
+const viewer = document.getElementById("photoViewer");
+
+if(viewer.style.display !== "flex") return;
+
+if(e.key === "ArrowRight") nextPhoto();
+if(e.key === "ArrowLeft") prevPhoto();
+if(e.key === "Escape") closePhotoViewer();
+});
+
+document.getElementById("viewerBox").addEventListener("touchstart", e => {
+touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById("viewerBox").addEventListener("touchend", e => {
+touchEndX = e.changedTouches[0].screenX;
+handleSwipe();
+});
+
+function handleSwipe(){
+const difference = touchStartX - touchEndX;
+
+if(Math.abs(difference) < 50) return;
+
+if(difference > 0){
+nextPhoto();
+}else{
+prevPhoto();
+}
 }
 </script>
 
