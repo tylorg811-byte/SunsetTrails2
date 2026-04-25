@@ -566,20 +566,63 @@ msg.textContent = "Photos uploaded successfully.";
 await viewPhotos(galleryId);
 }
 
+let currentPhotos = [];
+let currentPhotoIndex = 0;
+
 async function viewPhotos(galleryId){
-const box = document.getElementById("photos-" + galleryId);
-
-box.innerHTML = `<p style="color:#f3d9b9;">Loading photos...</p>`;
-
 const { data, error } = await supabaseClient
 .from("gallery_photos")
 .select("*")
 .eq("gallery_id", galleryId)
-.order("created_at", { ascending:false });
+.order("created_at", { ascending:true });
 
 if(error){
-box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+alert(error.message);
 return;
+}
+
+if(!data || !data.length){
+alert("No photos uploaded yet.");
+return;
+}
+
+currentPhotos = data;
+currentPhotoIndex = 0;
+openPhotoViewer();
+}
+
+function openPhotoViewer(){
+const photo = currentPhotos[currentPhotoIndex];
+
+document.getElementById("viewerImg").src = photo.image_url;
+document.getElementById("viewerCount").textContent =
+(currentPhotoIndex + 1) + " / " + currentPhotos.length;
+
+document.getElementById("photoViewer").style.display = "flex";
+}
+
+function closePhotoViewer(){
+document.getElementById("photoViewer").style.display = "none";
+}
+
+function nextPhoto(){
+currentPhotoIndex++;
+
+if(currentPhotoIndex >= currentPhotos.length){
+currentPhotoIndex = 0;
+}
+
+openPhotoViewer();
+}
+
+function prevPhoto(){
+currentPhotoIndex--;
+
+if(currentPhotoIndex < 0){
+currentPhotoIndex = currentPhotos.length - 1;
+}
+
+openPhotoViewer();
 }
 
 if(!data || !data.length){
