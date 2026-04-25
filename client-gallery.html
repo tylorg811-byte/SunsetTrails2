@@ -4,12 +4,10 @@
 <meta charset="UTF-8">
 <title>Client Gallery | Sunset Trails Photography</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Private client gallery for Sunset Trails Photography.">
+<meta name="description" content="Private client proofing gallery for Sunset Trails Photography.">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons"></script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -20,9 +18,9 @@ background:#100804;
 color:white;
 min-height:100vh;
 background:
-radial-gradient(circle at 20% 0%,rgba(255,196,101,.22),transparent 28%),
-radial-gradient(circle at 80% 8%,rgba(205,111,30,.18),transparent 30%),
-linear-gradient(rgba(18,11,5,.72),rgba(18,11,5,.96)),
+radial-gradient(circle at 20% 0%,rgba(255,196,101,.22),transparent 30%),
+radial-gradient(circle at 80% 10%,rgba(205,111,30,.18),transparent 30%),
+linear-gradient(rgba(18,11,5,.76),rgba(18,11,5,.96)),
 url('sunset-bg.jpg') center/cover fixed;
 }
 
@@ -36,7 +34,7 @@ backdrop-filter:blur(20px);
 border-bottom:1px solid rgba(255,204,120,.2);
 position:sticky;
 top:0;
-z-index:10;
+z-index:50;
 }
 
 .logo{
@@ -135,9 +133,7 @@ color:#1b0e04;
 box-shadow:0 16px 38px rgba(199,123,40,.34);
 }
 
-button:hover{
-filter:brightness(1.06);
-}
+button:hover{filter:brightness(1.06)}
 
 .access-box button{
 width:100%;
@@ -204,9 +200,7 @@ border:1px solid rgba(255,211,138,.2);
 backdrop-filter:blur(16px);
 }
 
-.cart-bar strong{
-color:#ffd38a;
-}
+.cart-bar strong{color:#ffd38a}
 
 .grid{
 display:grid;
@@ -238,9 +232,7 @@ display:block;
 transition:.45s ease;
 }
 
-.card:hover .image-wrap img{
-transform:scale(1.055);
-}
+.card:hover .image-wrap img{transform:scale(1.055)}
 
 .watermark-overlay{
 position:absolute;
@@ -288,6 +280,7 @@ justify-content:center;
 font-size:20px;
 cursor:pointer;
 box-shadow:none;
+color:white;
 }
 
 .favorite-chip.active{
@@ -295,9 +288,7 @@ background:rgba(255,211,138,.92);
 color:#1b0e04;
 }
 
-.card-content{
-padding:18px;
-}
+.card-content{padding:18px}
 
 .card-content p{
 color:#f3d9b9;
@@ -326,9 +317,7 @@ font-weight:900;
 font-size:13px;
 }
 
-.card-actions a{
-display:block;
-}
+.card-actions a{display:block}
 
 .view{
 background:rgba(255,255,255,.12);
@@ -503,7 +492,6 @@ border-radius:18px;
 header{padding:18px 5%}
 .logo{font-size:21px}
 .hero{padding:70px 5% 40px}
-gallery-wrap{padding:10px 5% 60px}
 .gallery-wrap{padding:10px 5% 70px}
 .grid{grid-template-columns:1fr}
 .image-wrap{height:310px}
@@ -560,6 +548,7 @@ gallery-wrap{padding:10px 5% 60px}
 <strong id="favoriteCount">0 favorites selected</strong><br>
 <span style="color:#f3d9b9;font-size:14px;">Use favorites to tell us which photos you love most.</span>
 </div>
+
 <div>
 <strong id="cartTotal">$0.00 cart total</strong>
 <div class="actions">
@@ -575,11 +564,13 @@ gallery-wrap{padding:10px 5% 60px}
 <div class="lightbox" id="lightbox">
 <span class="close" onclick="closeLightbox()">×</span>
 <button class="arrow left" onclick="prevPhoto()">‹</button>
+
 <div class="viewer-box">
 <img id="lightboxImg">
 <div class="viewer-watermark" id="viewerWatermark"><span>Sunset Trails</span></div>
 <p id="viewerCount" style="color:#ffd38a;font-weight:900;margin-top:12px;"></p>
 </div>
+
 <button class="arrow right" onclick="nextPhoto()">›</button>
 </div>
 
@@ -622,6 +613,7 @@ gallery-wrap{padding:10px 5% 60px}
 <script>
 const SUPABASE_URL = "https://mcjqykkjyvhcqlfjwzpo.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8";
+const PAYPAL_CLIENT_ID = "YOUR_PAYPAL_CLIENT_ID";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -631,7 +623,7 @@ let currentIndex = 0;
 let selectedPhoto = null;
 let favorites = new Set();
 let cart = [];
-let paypalRendered = false;
+let paypalScriptLoaded = false;
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -865,226 +857,4 @@ return;
 }
 
 renderCartItems();
-document.getElementById("cartModal").style.display = "flex";
-renderPayPalButtons();
-}
-
-function closeCart(){
-document.getElementById("cartModal").style.display = "none";
-}
-
-function renderCartItems(){
-const box = document.getElementById("cartItems");
-const total = cart.reduce((sum,item) => sum + item.price, 0);
-
-box.innerHTML = "";
-
-cart.forEach(item => {
-const div = document.createElement("div");
-div.className = "cart-item";
-div.innerHTML = `
-<span>${item.caption}</span>
-<strong>$${item.price.toFixed(2)}</strong>
-`;
-box.appendChild(div);
-});
-
-document.getElementById("cartModalTotal").textContent = "$" + total.toFixed(2) + " total";
-}
-
-function renderPayPalButtons(){
-const container = document.getElementById("paypal-button-container");
-container.innerHTML = "";
-paypalRendered = false;
-
-if(typeof paypal === "undefined"){
-container.innerHTML = `<p style="color:#111;font-weight:800;">PayPal is not ready. Replace YOUR_PAYPAL_CLIENT_ID in the script tag.</p>`;
-return;
-}
-
-const total = cart.reduce((sum,item) => sum + item.price, 0).toFixed(2);
-
-paypal.Buttons({
-style:{
-layout:"vertical",
-color:"gold",
-shape:"pill",
-label:"paypal"
-},
-
-createOrder:function(data,actions){
-return actions.order.create({
-purchase_units:[{
-description:"Sunset Trails Photography photo purchase",
-amount:{
-currency_code:"USD",
-value:total
-}
-}]
-});
-},
-
-onApprove:function(data,actions){
-return actions.order.capture().then(async function(details){
-const inserts = cart.map(item => ({
-gallery_id: currentGallery.id,
-photo_id: item.id,
-client_name: getClientName(),
-client_email: getClientEmail(),
-amount: item.price,
-paypal_order_id: data.orderID,
-paypal_status: details.status || "COMPLETED"
-}));
-
-const { error } = await supabaseClient
-.from("photo_orders")
-.insert(inserts);
-
-if(error){
-document.getElementById("cartMessage").textContent = "Payment completed, but order save failed: " + error.message;
-return;
-}
-
-document.getElementById("cartMessage").textContent = "Payment successful. Your order was sent.";
-cart = [];
-updateCartUI();
-setTimeout(closeCart, 1300);
-});
-},
-
-onCancel:function(){
-document.getElementById("cartMessage").textContent = "Checkout canceled.";
-},
-
-onError:function(err){
-document.getElementById("cartMessage").textContent = "PayPal error. Please try again.";
-console.log(err);
-}
-}).render("#paypal-button-container");
-}
-
-function resetGallery(){
-document.getElementById("galleryWrap").style.display = "none";
-document.getElementById("accessBox").style.display = "block";
-document.getElementById("codeInput").value = "";
-currentGallery = null;
-currentPhotos = [];
-favorites.clear();
-cart = [];
-}
-
-function openLightbox(index){
-currentIndex = index;
-const photo = currentPhotos[currentIndex];
-
-document.getElementById("lightboxImg").src = photo.image_url;
-document.getElementById("viewerCount").textContent =
-(currentIndex + 1) + " / " + currentPhotos.length + " — " + (photo.is_approved ? "Approved Final" : "Proof");
-
-document.getElementById("viewerWatermark").style.display =
-(photo.is_approved !== true && photo.watermark_enabled !== false) ? "flex" : "none";
-
-document.getElementById("lightbox").style.display = "flex";
-}
-
-function closeLightbox(){
-document.getElementById("lightbox").style.display = "none";
-}
-
-function nextPhoto(){
-if(!currentPhotos.length) return;
-currentIndex++;
-if(currentIndex >= currentPhotos.length) currentIndex = 0;
-openLightbox(currentIndex);
-}
-
-function prevPhoto(){
-if(!currentPhotos.length) return;
-currentIndex--;
-if(currentIndex < 0) currentIndex = currentPhotos.length - 1;
-openLightbox(currentIndex);
-}
-
-function openRequestModal(index,type){
-selectedPhoto = currentPhotos[index];
-
-document.getElementById("requestType").value = type;
-document.getElementById("requestMessage").value = "";
-document.getElementById("requestStatus").textContent = "";
-
-document.getElementById("requestPhotoText").textContent =
-`Requesting: ${selectedPhoto.caption || "Photo"}${selectedPhoto.price && selectedPhoto.price > 0 ? " — $" + Number(selectedPhoto.price).toFixed(2) : ""}`;
-
-document.getElementById("requestModal").style.display = "flex";
-}
-
-function closeRequestModal(){
-document.getElementById("requestModal").style.display = "none";
-}
-
-async function submitRequest(){
-const client_name = getClientName();
-const client_email = getClientEmail();
-const request_type = document.getElementById("requestType").value.trim();
-const message = document.getElementById("requestMessage").value.trim();
-const status = document.getElementById("requestStatus");
-
-status.textContent = "";
-
-if(!currentGallery || !selectedPhoto){
-status.textContent = "No photo selected.";
-return;
-}
-
-if(!client_name || !client_email){
-status.textContent = "Please enter your name and email before sending a request.";
-return;
-}
-
-if(!request_type){
-status.textContent = "Please enter a request type.";
-return;
-}
-
-const { error } = await supabaseClient
-.from("gallery_requests")
-.insert([{
-gallery_id: currentGallery.id,
-photo_id: selectedPhoto.id,
-client_name,
-client_email,
-request_type,
-message
-}]);
-
-if(error){
-status.textContent = error.message;
-return;
-}
-
-status.textContent = "Request sent successfully.";
-setTimeout(closeRequestModal,900);
-}
-
-document.addEventListener("keydown", e => {
-if(document.getElementById("lightbox").style.display !== "flex") return;
-if(e.key === "ArrowRight") nextPhoto();
-if(e.key === "ArrowLeft") prevPhoto();
-if(e.key === "Escape") closeLightbox();
-});
-
-document.querySelector(".viewer-box").addEventListener("touchstart", e => {
-touchStartX = e.changedTouches[0].screenX;
-});
-
-document.querySelector(".viewer-box").addEventListener("touchend", e => {
-touchEndX = e.changedTouches[0].screenX;
-const diff = touchStartX - touchEndX;
-if(Math.abs(diff) < 50) return;
-if(diff > 0) nextPhoto();
-else prevPhoto();
-});
-</script>
-
-</body>
-</html>
+document.getElementById("cartModal").
