@@ -724,6 +724,67 @@ header{padding:17px 5%}
 .arrow.left{left:8px}
 .arrow.right{right:8px}
 }
+
+  /* FIX: Client gallery photo cards under albums */
+.album-photo-grid,
+#photoGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
+  align-items:start;
+}
+
+.card{
+  width:100%;
+  min-width:0;
+}
+
+.image-wrap{
+  height:360px;
+}
+
+.card-content{
+  padding:22px;
+}
+
+.card-content p{
+  font-size:15px;
+  line-height:1.55;
+  word-break:normal;
+}
+
+.price-line{
+  font-size:16px;
+  line-height:1.4;
+}
+
+.card-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+
+.card-actions button,
+.card-actions a{
+  width:100%;
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:normal;
+  line-height:1.2;
+}
+
+@media(max-width:700px){
+  .album-photo-grid,
+  #photoGrid{
+    grid-template-columns:1fr;
+  }
+
+  .image-wrap{
+    height:390px;
+  }
+}
 </style>
 </head>
 
