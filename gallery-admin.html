@@ -10,57 +10,94 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Inter,sans-serif;background:#0c0502;color:white;min-height:100vh;background:radial-gradient(circle at top left,rgba(255,179,71,.18),transparent 35%),radial-gradient(circle at top right,rgba(255,211,138,.14),transparent 32%),linear-gradient(135deg,#160904,#050201)}
-header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.42);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,200,120,.18);position:sticky;top:0;z-index:50}
-.logo{font-family:'Playfair Display',serif;font-size:24px;color:#ffd38a}
-.container{padding:45px 6%;max-width:1400px;margin:auto}
-h1,h2{font-family:'Playfair Display',serif;color:#ffd38a}
-h1{font-size:clamp(40px,6vw,72px);line-height:1;margin-bottom:10px}
-.sub{color:#f3d9b9;line-height:1.7;margin-bottom:28px}
-.panel{background:rgba(255,255,255,.07);border:1px solid rgba(255,211,138,.18);border-radius:24px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.28);backdrop-filter:blur(18px);margin-bottom:22px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-input,textarea,select{width:100%;padding:14px 15px;border:none;outline:none;border-radius:13px;background:rgba(255,255,255,.94);font-family:Inter,sans-serif;font-size:15px}
-textarea{min-height:100px;resize:vertical}
-label{display:block;font-size:14px;font-weight:800;color:#ffd38a;margin-bottom:7px}
-.field{margin-bottom:15px}
-button{border:none;cursor:pointer;border-radius:999px;padding:13px 20px;font-weight:900;background:linear-gradient(135deg,#ffd38a,#c77b28);color:#1b0e04;box-shadow:0 14px 34px rgba(199,123,40,.28)}
-.secondary{background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.18);box-shadow:none}
-.danger{background:#932222;color:white;box-shadow:none}
-.admin{display:none}
-.message{margin-top:12px;color:#ffd38a;font-weight:800}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,211,138,.16);border-radius:20px;padding:18px}
-.stat strong{display:block;font-size:30px;color:#ffd38a}
-.stat span{font-size:13px;color:#f3d9b9;font-weight:800}
-.gallery-list{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-.gallery-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,211,138,.16);border-radius:22px;padding:20px}
-.gallery-card h3{font-family:'Playfair Display',serif;font-size:25px;color:#ffd38a;margin-bottom:6px}
-.gallery-card p{color:#f3d9b9;font-size:14px;line-height:1.6}
-.code{display:inline-block;margin:10px 0;padding:7px 12px;border-radius:999px;background:rgba(255,211,138,.14);color:#ffd38a;font-weight:900;font-size:13px}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
-.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,160px));gap:11px;margin-top:16px}
-.photo{width:160px;aspect-ratio:1/1;border-radius:15px;overflow:hidden;position:relative;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
-.photo img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
-.badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#ffd38a;font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px}
-.photo button{position:absolute;bottom:0;left:0;width:100%;border-radius:0;padding:8px;font-size:12px;background:rgba(147,34,34,.95);color:white}
-.list{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.item{background:rgba(255,255,255,.06);border:1px solid rgba(255,211,138,.14);border-radius:18px;padding:16px}
-.item strong{color:#ffd38a}
-.item p{color:#f3d9b9;font-size:14px;line-height:1.5;margin-top:5px}
-.item img{width:120px;height:120px;object-fit:cover;border-radius:14px;margin-top:10px}
-.viewer{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;z-index:9999;padding:25px}
-.viewer-box{max-width:92%;text-align:center}
-.viewer-box img{max-width:100%;max-height:58vh;object-fit:contain;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
-.viewer-box p{color:#ffd38a;font-weight:900;margin-top:12px}
-.close{position:absolute;top:20px;right:28px;font-size:44px;color:white;cursor:pointer}
-.arrow{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;background:rgba(255,211,138,.18);color:#ffd38a;border:1px solid rgba(255,211,138,.3);box-shadow:none}
-.arrow.left{left:18px}
-.arrow.right{right:18px}
-.viewer-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-.viewer-edit{margin:14px auto 0;max-width:620px;background:rgba(255,255,255,.08);border:1px solid rgba(255,211,138,.15);border-radius:18px;padding:14px}
-.viewer-edit .grid{grid-template-columns:1fr 1fr 1fr}
-@media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}.grid,.gallery-list,.list{grid-template-columns:1fr}.viewer-edit .grid{grid-template-columns:1fr}}
-@media(max-width:600px){.container{padding:35px 5%}header{padding:16px 5%}.logo{font-size:20px}.stats{grid-template-columns:1fr}.photo{width:135px}.photos{grid-template-columns:repeat(auto-fill,minmax(125px,135px))}.arrow{width:44px;height:44px;font-size:32px}.arrow.left{left:8px}.arrow.right{right:8px}}
+
+body{
+font-family:Inter,sans-serif;
+background:#0c0502;
+color:white;
+min-height:100vh;
+background:
+radial-gradient(circle at top left,rgba(255,179,71,.18),transparent 35%),
+radial-gradient(circle at top right,rgba(255,211,138,.14),transparent 32%),
+linear-gradient(135deg,#160904,#050201);
+}
+
+header{
+padding:18px 6%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(0,0,0,.42);
+backdrop-filter:blur(14px);
+border-bottom:1px solid rgba(255,200,120,.18);
+position:sticky;
+top:0;
+z-index:50;
+}
+
+.logo{
+font-family:'Playfair Display',serif;
+font-size:24px;
+color:#ffd38a;
+}
+
+.container{
+padding:45px 6%;
+max-width:1400px;
+margin:auto;
+}
+
+h1,h2{
+font-family:'Playfair Display',serif;
+color:#ffd38a;
+}
+
+h1{
+font-size:clamp(40px,6vw,72px);
+line-height:1;
+margin-bottom:10px;
+}
+
+.sub{
+color:#f3d9b9;
+line-height:1.7;
+margin-bottom:28px;
+}
+
+.panel{
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,211,138,.18);
+border-radius:24px;
+padding:24px;
+box-shadow:0 25px 70px rgba(0,0,0,.28);
+backdrop-filter:blur(18px);
+margin-bottom:22px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:16px;
+}
+
+.three-grid{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:16px;
+}
+
+input,textarea,select{
+width:100%;
+padding:14px 15px;
+border:none;
+outline:none;
+border-radius:13px;
+background:rgba(255,255,255,.94);
+font-family:Inter,sans-serif;
+font-size:15px;
+color:#1b0e04;
+}
+
 input[type="file"]{
 background:#fff;
 color:#1b0e04;
@@ -89,6 +126,309 @@ font-weight:900;
 margin-right:12px;
 cursor:pointer;
 }
+
+textarea{
+min-height:100px;
+resize:vertical;
+}
+
+label{
+display:block;
+font-size:14px;
+font-weight:800;
+color:#ffd38a;
+margin-bottom:7px;
+}
+
+.field{
+margin-bottom:15px;
+}
+
+button{
+border:none;
+cursor:pointer;
+border-radius:999px;
+padding:13px 20px;
+font-weight:900;
+background:linear-gradient(135deg,#ffd38a,#c77b28);
+color:#1b0e04;
+box-shadow:0 14px 34px rgba(199,123,40,.28);
+}
+
+.secondary{
+background:rgba(255,255,255,.1);
+color:white;
+border:1px solid rgba(255,255,255,.18);
+box-shadow:none;
+}
+
+.danger{
+background:#932222;
+color:white;
+box-shadow:none;
+}
+
+.admin{
+display:none;
+}
+
+.message{
+margin-top:12px;
+color:#ffd38a;
+font-weight:800;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:14px;
+margin-bottom:22px;
+}
+
+.stat{
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,211,138,.16);
+border-radius:20px;
+padding:18px;
+}
+
+.stat strong{
+display:block;
+font-size:30px;
+color:#ffd38a;
+}
+
+.stat span{
+font-size:13px;
+color:#f3d9b9;
+font-weight:800;
+}
+
+.gallery-list{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:16px;
+}
+
+.gallery-card{
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,211,138,.16);
+border-radius:22px;
+padding:20px;
+}
+
+.gallery-card h3{
+font-family:'Playfair Display',serif;
+font-size:25px;
+color:#ffd38a;
+margin-bottom:6px;
+}
+
+.gallery-card p{
+color:#f3d9b9;
+font-size:14px;
+line-height:1.6;
+}
+
+.code{
+display:inline-block;
+margin:10px 0;
+padding:7px 12px;
+border-radius:999px;
+background:rgba(255,211,138,.14);
+color:#ffd38a;
+font-weight:900;
+font-size:13px;
+}
+
+.actions{
+display:flex;
+gap:9px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+
+.photos{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(130px,160px));
+gap:11px;
+margin-top:16px;
+}
+
+.photo{
+width:160px;
+aspect-ratio:1/1;
+border-radius:15px;
+overflow:hidden;
+position:relative;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.12);
+}
+
+.photo img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+cursor:pointer;
+}
+
+.badge{
+position:absolute;
+top:8px;
+left:8px;
+background:rgba(0,0,0,.7);
+color:#ffd38a;
+font-size:11px;
+font-weight:900;
+padding:5px 8px;
+border-radius:999px;
+max-width:90%;
+}
+
+.photo button{
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+border-radius:0;
+padding:8px;
+font-size:12px;
+background:rgba(147,34,34,.95);
+color:white;
+}
+
+.list{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+}
+
+.item{
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,211,138,.14);
+border-radius:18px;
+padding:16px;
+}
+
+.item strong{
+color:#ffd38a;
+}
+
+.item p{
+color:#f3d9b9;
+font-size:14px;
+line-height:1.5;
+margin-top:5px;
+}
+
+.item img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:14px;
+margin-top:10px;
+}
+
+.viewer{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.94);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+padding:25px;
+overflow:auto;
+}
+
+.viewer-box{
+max-width:92%;
+text-align:center;
+}
+
+.viewer-box img{
+max-width:100%;
+max-height:55vh;
+object-fit:contain;
+border-radius:20px;
+box-shadow:0 30px 80px rgba(0,0,0,.6);
+}
+
+.viewer-box p{
+color:#ffd38a;
+font-weight:900;
+margin-top:12px;
+}
+
+.close{
+position:absolute;
+top:20px;
+right:28px;
+font-size:44px;
+color:white;
+cursor:pointer;
+}
+
+.arrow{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+width:54px;
+height:54px;
+border-radius:50%;
+font-size:40px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(255,211,138,.18);
+color:#ffd38a;
+border:1px solid rgba(255,211,138,.3);
+box-shadow:none;
+}
+
+.arrow.left{left:18px}
+.arrow.right{right:18px}
+
+.viewer-actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+margin-top:14px;
+}
+
+.viewer-edit{
+margin:14px auto 0;
+max-width:760px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,211,138,.15);
+border-radius:18px;
+padding:14px;
+}
+
+.viewer-edit .grid{
+grid-template-columns:1fr 1fr;
+}
+
+@media(max-width:1000px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.grid,.three-grid,.gallery-list,.list{grid-template-columns:1fr}
+.viewer-edit .grid{grid-template-columns:1fr}
+}
+
+@media(max-width:600px){
+.container{padding:35px 5%}
+header{padding:16px 5%}
+.logo{font-size:20px}
+.stats{grid-template-columns:1fr}
+.photo{width:135px}
+.photos{grid-template-columns:repeat(auto-fill,minmax(125px,135px))}
+.arrow{width:44px;height:44px;font-size:32px}
+.arrow.left{left:8px}
+.arrow.right{right:8px}
+.viewer-box img{max-height:45vh}
+}
 </style>
 </head>
 
@@ -103,7 +443,7 @@ cursor:pointer;
 
 <section id="loginPanel" class="panel">
 <h1>Gallery Admin</h1>
-<p class="sub">Manage client galleries, proof photos, favorites, print requests, PayPal orders, and pricing.</p>
+<p class="sub">Manage client galleries, full album pricing, proof photos, favorites, print requests, PayPal orders, and photo pricing.</p>
 
 <div class="field">
 <label>Email</label>
@@ -122,7 +462,7 @@ cursor:pointer;
 <section id="adminPanel" class="admin">
 
 <h1>Admin Console</h1>
-<p class="sub">Upload photos, approve finals, control watermarks, edit prices, and clear finished requests.</p>
+<p class="sub">Upload proofs, set album pricing, approve finals, control watermarks, edit prices, and clear finished requests.</p>
 
 <div class="stats">
 <div class="stat"><strong id="statGalleries">0</strong><span>Galleries</span></div>
@@ -158,6 +498,23 @@ cursor:pointer;
 </div>
 </div>
 
+<div class="three-grid">
+<div class="field">
+<label>Full Gallery Price</label>
+<input id="fullGalleryPrice" type="number" step="0.01" placeholder="150.00">
+</div>
+
+<div class="field">
+<label>Album Package Name</label>
+<input id="albumName" placeholder="Premium Album Package">
+</div>
+
+<div class="field">
+<label>Album Package Price</label>
+<input id="albumPrice" type="number" step="0.01" placeholder="75.00">
+</div>
+</div>
+
 <div class="field">
 <label>Gallery Notes</label>
 <textarea id="notes" placeholder="Your proof gallery is ready. Watermarked photos are previews. Approved finals can be downloaded."></textarea>
@@ -187,7 +544,7 @@ cursor:pointer;
 </div>
 
 <div class="field">
-<label>Price for Purchase</label>
+<label>Price for Individual Purchase</label>
 <input id="photoPrice" type="number" step="0.01" placeholder="25.00">
 </div>
 </div>
@@ -266,14 +623,15 @@ cursor:pointer;
 <label>Price</label>
 <input id="editPrice" type="number" step="0.01" placeholder="25.00">
 </div>
+</div>
 
+<div class="grid">
 <div class="field">
 <label>Status</label>
 <select id="editApproved">
 <option value="false">Proof</option>
 <option value="true">Approved Final</option>
 </select>
-</div>
 </div>
 
 <div class="field">
@@ -282,6 +640,7 @@ cursor:pointer;
 <option value="true">Watermark On</option>
 <option value="false">Watermark Off</option>
 </select>
+</div>
 </div>
 
 <button onclick="savePhotoEdits()">Save Photo Changes</button>
@@ -298,7 +657,10 @@ cursor:pointer;
 </div>
 
 <script>
-const supabaseClient = supabase.createClient("https://mcjqykkjyvhcqlfjwzpo.supabase.co","sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8");
+const supabaseClient = supabase.createClient(
+"https://mcjqykkjyvhcqlfjwzpo.supabase.co",
+"sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8"
+);
 
 let allGalleries = [];
 let currentPhotos = [];
@@ -366,6 +728,9 @@ const client_name = document.getElementById("clientName").value.trim();
 const gallery_code = document.getElementById("galleryCode").value.trim().toUpperCase();
 const package_name = document.getElementById("packageName").value.trim();
 const payment_link = document.getElementById("paymentLink").value.trim();
+const full_gallery_price = parseFloat(document.getElementById("fullGalleryPrice").value || "0");
+const album_name = document.getElementById("albumName").value.trim() || "Album Package";
+const album_price = parseFloat(document.getElementById("albumPrice").value || "0");
 const notes = document.getElementById("notes").value.trim();
 const msg = document.getElementById("createMessage");
 
@@ -378,7 +743,16 @@ return;
 
 const { error } = await supabaseClient
 .from("client_galleries")
-.insert([{client_name,gallery_code,package_name,payment_link,notes}]);
+.insert([{
+client_name,
+gallery_code,
+package_name,
+payment_link,
+full_gallery_price: full_gallery_price || 0,
+album_name,
+album_price: album_price || 0,
+notes
+}]);
 
 if(error){
 msg.textContent = error.message;
@@ -391,6 +765,9 @@ document.getElementById("clientName").value = "";
 document.getElementById("galleryCode").value = "";
 document.getElementById("packageName").value = "";
 document.getElementById("paymentLink").value = "";
+document.getElementById("fullGalleryPrice").value = "";
+document.getElementById("albumName").value = "";
+document.getElementById("albumPrice").value = "";
 document.getElementById("notes").value = "";
 
 await loadGalleries();
@@ -433,10 +810,13 @@ card.innerHTML = `
 <p>${gallery.package_name || "No package listed"}</p>
 <span class="code">${gallery.gallery_code}</span>
 <p>${gallery.notes || ""}</p>
+<p><b>Full Gallery:</b> $${Number(gallery.full_gallery_price || 0).toFixed(2)}</p>
+<p><b>${gallery.album_name || "Album Package"}:</b> $${Number(gallery.album_price || 0).toFixed(2)}</p>
 
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
+<button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Gallery Pricing</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
 
@@ -445,6 +825,36 @@ card.innerHTML = `
 
 list.appendChild(card);
 });
+}
+
+async function editGalleryPricing(galleryId){
+const gallery = allGalleries.find(g => g.id === galleryId);
+if(!gallery) return;
+
+const fullPrice = prompt("Full gallery price:", Number(gallery.full_gallery_price || 0).toFixed(2));
+if(fullPrice === null) return;
+
+const albumName = prompt("Album package name:", gallery.album_name || "Album Package");
+if(albumName === null) return;
+
+const albumPrice = prompt("Album package price:", Number(gallery.album_price || 0).toFixed(2));
+if(albumPrice === null) return;
+
+const { error } = await supabaseClient
+.from("client_galleries")
+.update({
+full_gallery_price: parseFloat(fullPrice || "0") || 0,
+album_name: albumName || "Album Package",
+album_price: parseFloat(albumPrice || "0") || 0
+})
+.eq("id", galleryId);
+
+if(error){
+alert(error.message);
+return;
+}
+
+await loadGalleries();
 }
 
 function copyCode(code){
@@ -918,13 +1328,18 @@ data.forEach(o => {
 const div = document.createElement("div");
 div.className = "item";
 
+let orderType = "Photo Purchase";
+if(!o.photo_id && Number(o.amount || 0) > 0){
+orderType = "Album / Full Gallery Purchase";
+}
+
 div.innerHTML = `
-<strong>PayPal Order — $${Number(o.amount || 0).toFixed(2)}</strong>
+<strong>${orderType} — $${Number(o.amount || 0).toFixed(2)}</strong>
 <p><b>Status:</b> ${o.paypal_status || ""}</p>
 <p><b>Order ID:</b> ${o.paypal_order_id || ""}</p>
 <p><b>Gallery:</b> ${o.client_galleries?.client_name || ""} — ${o.client_galleries?.gallery_code || ""}</p>
 <p><b>Client:</b> ${o.client_name || ""} ${o.client_email ? "— " + o.client_email : ""}</p>
-<p><b>Photo:</b> ${o.gallery_photos?.caption || "Photo"}</p>
+<p><b>Photo:</b> ${o.gallery_photos?.caption || "Album / Full Gallery"}</p>
 ${o.gallery_photos?.image_url ? `<img src="${o.gallery_photos.image_url}">` : ""}
 <div class="actions">
 <button class="danger" onclick="deleteOrder('${o.id}')">Clear Order Record</button>
