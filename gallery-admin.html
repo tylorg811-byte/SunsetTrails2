@@ -248,6 +248,7 @@ flex-wrap:wrap;
 margin-top:12px;
 }
 
+
 .album-tools{
 display:grid;
 grid-template-columns:1fr 1fr 1fr;
@@ -539,9 +540,21 @@ header{padding:16px 5%}
 </div>
 </div>
 
+<div class="three-grid">
 <div class="field">
 <label>Full Gallery Price</label>
 <input id="fullGalleryPrice" type="number" step="0.01" placeholder="150.00">
+</div>
+
+<div class="field">
+<label>Album Package Name</label>
+<input id="albumName" placeholder="Premium Album Package">
+</div>
+
+<div class="field">
+<label>Album Package Price</label>
+<input id="albumPrice" type="number" step="0.01" placeholder="75.00">
+</div>
 </div>
 
 <div class="field">
@@ -561,38 +574,37 @@ header{padding:16px 5%}
 <select id="gallerySelect"></select>
 </div>
 
-<div class="panel" style="padding:20px;margin-bottom:18px;background:rgba(255,211,138,.075);border:1px solid rgba(255,211,138,.28);">
-<h2 style="font-size:28px;">Upload Into An Album</h2>
-<p class="album-note">This is where albums are created and where photos are assigned. Create an album here, then it will automatically be selected for the photos you upload below. Leave the dropdown on “Individual photos / No album” when you do not want the photos inside an album.</p>
+<div class="panel" style="padding:18px;margin-bottom:16px;background:rgba(255,211,138,.055);">
+<h2 style="font-size:26px;">Album Options For This Upload</h2>
+<p class="album-note">Create an album here before uploading, select an existing album, or leave it on individual photos.</p>
 
-<div class="field" style="margin-top:14px;">
-<label>Step 1 — Choose Existing Album Or Individual Upload</label>
+<div class="grid" style="margin-top:14px;">
+<div class="field">
+<label>Upload Into Album</label>
 <select id="uploadAlbumSelect">
 <option value="">Individual photos / No album</option>
 </select>
 </div>
 
-<div class="grid">
 <div class="field">
-<label>Step 2 — New Album Name</label>
+<label>New Album Name</label>
 <input id="newAlbumName" placeholder="Smith Wedding Album / Family Favorites">
 </div>
+</div>
 
+<div class="grid">
 <div class="field">
 <label>New Album Price</label>
 <input id="newAlbumPrice" type="number" step="0.01" placeholder="75.00">
-</div>
 </div>
 
 <div class="field">
 <label>New Album Description</label>
 <input id="newAlbumDescription" placeholder="A curated album package from this session.">
 </div>
-
-<div class="actions">
-<button onclick="createAlbumForUpload()">Create Album + Select It</button>
-<button class="secondary" onclick="loadUploadAlbums(document.getElementById('gallerySelect').value)">Refresh Album List</button>
 </div>
+
+<button onclick="createAlbumForUpload()">Create Album For This Upload</button>
 <div class="message" id="albumMessage"></div>
 </div>
 
@@ -731,15 +743,16 @@ let currentPhotos = [];
 let currentPhotoIndex = 0;
 let currentGalleryId = null;
 let albumCache = {};
-let albumPhotoMode = "all";
 
 window.addEventListener("load", async () => {
 const { data } = await supabaseClient.auth.getSession();
 if(data.session) showAdmin();
 });
 
-document.getElementById("gallerySelect").addEventListener("change", async () => {
-await loadUploadAlbums(document.getElementById("gallerySelect").value);
+document.addEventListener("change", async e => {
+if(e.target && e.target.id === "gallerySelect"){
+await loadUploadAlbums(e.target.value);
+}
 });
 
 async function login(){
@@ -799,6 +812,8 @@ const gallery_code = document.getElementById("galleryCode").value.trim().toUpper
 const package_name = document.getElementById("packageName").value.trim();
 const payment_link = document.getElementById("paymentLink").value.trim();
 const full_gallery_price = parseFloat(document.getElementById("fullGalleryPrice").value || "0");
+const album_name = document.getElementById("albumName").value.trim() || "Album Package";
+const album_price = parseFloat(document.getElementById("albumPrice").value || "0");
 const notes = document.getElementById("notes").value.trim();
 const msg = document.getElementById("createMessage");
 
@@ -817,6 +832,8 @@ gallery_code,
 package_name,
 payment_link,
 full_gallery_price: full_gallery_price || 0,
+album_name,
+album_price: album_price || 0,
 notes
 }]);
 
@@ -832,6 +849,8 @@ document.getElementById("galleryCode").value = "";
 document.getElementById("packageName").value = "";
 document.getElementById("paymentLink").value = "";
 document.getElementById("fullGalleryPrice").value = "";
+document.getElementById("albumName").value = "";
+document.getElementById("albumPrice").value = "";
 document.getElementById("notes").value = "";
 
 await loadGalleries();
@@ -875,13 +894,13 @@ card.innerHTML = `
 <span class="code">${gallery.gallery_code}</span>
 <p>${gallery.notes || ""}</p>
 <p><b>Full Gallery:</b> $${Number(gallery.full_gallery_price || 0).toFixed(2)}</p>
-<p style="margin-top:6px;"><b>Albums:</b> Create and assign albums inside the Upload Photos panel.</p>
+<p><b>${gallery.album_name || "Album Package"}:</b> $${Number(gallery.album_price || 0).toFixed(2)}</p>
 
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
 <button class="secondary" onclick="viewAlbums('${gallery.id}')">Manage Albums</button>
-<button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Full Gallery Price</button>
+<button class="secondary" onclick="editGalleryPricing('${gallery.id}')">Edit Gallery Pricing</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
 
@@ -891,14 +910,13 @@ card.innerHTML = `
 
 list.appendChild(card);
 });
+}
 
-if(allGalleries.length && select.value){
-await loadUploadAlbums(select.value);
-}
-}
 
 async function loadUploadAlbums(galleryId){
 const select = document.getElementById("uploadAlbumSelect");
+const msg = document.getElementById("albumMessage");
+
 if(!select) return;
 
 select.innerHTML = `<option value="">Individual photos / No album</option>`;
@@ -912,15 +930,16 @@ const { data, error } = await supabaseClient
 .order("created_at", {ascending:false});
 
 if(error){
-document.getElementById("albumMessage").textContent = error.message;
+if(msg) msg.textContent = error.message;
 return;
 }
 
 albumCache[galleryId] = data || [];
 
 (data || []).forEach(album => {
+if(!album.id) return;
 const opt = document.createElement("option");
-opt.value = album.id;
+opt.value = String(album.id);
 opt.textContent = `${album.album_name || "Untitled Album"} — $${Number(album.album_price || 0).toFixed(2)}`;
 select.appendChild(opt);
 });
@@ -953,7 +972,7 @@ album_name,
 album_price: album_price || 0,
 album_description: album_description || ""
 }])
-.select()
+.select("id,gallery_id,album_name,album_price,album_description,created_at")
 .single();
 
 if(error){
@@ -961,20 +980,18 @@ msg.textContent = error.message;
 return;
 }
 
-msg.textContent = "Album created. It is now selected for this upload.";
-
 document.getElementById("newAlbumName").value = "";
 document.getElementById("newAlbumPrice").value = "";
 document.getElementById("newAlbumDescription").value = "";
 
 await loadUploadAlbums(galleryId);
-document.getElementById("uploadAlbumSelect").value = data.id;
 
-const albumBox = document.getElementById("albums-" + galleryId);
-if(albumBox){
-albumBox.dataset.open = "false";
-albumBox.innerHTML = "";
+const select = document.getElementById("uploadAlbumSelect");
+if(select && data && data.id){
+select.value = String(data.id);
 }
+
+msg.textContent = "Album created and selected. Now choose photos and click Upload Photos.";
 }
 
 async function viewAlbums(galleryId){
@@ -1003,7 +1020,7 @@ return;
 albumCache[galleryId] = data || [];
 
 if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No albums created yet.</p>`;
+box.innerHTML = `<p style="color:#f3d9b9;">No albums created yet. Create albums in the Upload Photos section.</p>`;
 box.dataset.open = "true";
 return;
 }
@@ -1029,7 +1046,8 @@ box.appendChild(div);
 }
 
 async function editAlbum(galleryId, albumId){
-const album = (albumCache[galleryId] || []).find(a => a.id === albumId);
+await loadUploadAlbums(galleryId);
+const album = (albumCache[galleryId] || []).find(a => String(a.id) === String(albumId));
 if(!album) return;
 
 const album_name = prompt("Album name:", album.album_name || "Untitled Album");
@@ -1083,13 +1101,72 @@ return;
 }
 
 await loadUploadAlbums(galleryId);
-const box = document.getElementById("albums-" + galleryId);
-if(box){
-box.dataset.open = "false";
-box.innerHTML = "";
+
+const albumBox = document.getElementById("albums-" + galleryId);
+if(albumBox){
+albumBox.dataset.open = "false";
+albumBox.innerHTML = "";
 await viewAlbums(galleryId);
 }
+
+const photoBox = document.getElementById("photos-" + galleryId);
+if(photoBox){
+photoBox.dataset.open = "false";
+photoBox.innerHTML = "";
 }
+}
+
+function getAlbumName(galleryId, albumId){
+if(!albumId) return "Individual";
+const album = (albumCache[galleryId] || []).find(a => String(a.id) === String(albumId));
+return album ? album.album_name : "Album";
+}
+
+async function viewAlbumPhotos(galleryId, albumId){
+currentGalleryId = galleryId;
+
+const box = document.getElementById("photos-" + galleryId);
+if(!box) return;
+
+await loadUploadAlbums(galleryId);
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
+box.dataset.open = "true";
+
+const { data, error } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id", galleryId)
+.eq("album_id", albumId)
+.order("created_at", {ascending:true});
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No photos in this album yet.</p>`;
+return;
+}
+
+currentPhotos = data;
+box.innerHTML = "";
+
+data.forEach((photo,index) => {
+const div = document.createElement("div");
+div.className = "photo";
+
+div.innerHTML = `
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} • ${getAlbumName(galleryId, photo.album_id)} • $${Number(photo.price || 0).toFixed(2)}</span>
+<img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
+<button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
+`;
+
+box.appendChild(div);
+});
+}
+
 
 async function editGalleryPricing(galleryId){
 const gallery = allGalleries.find(g => g.id === galleryId);
@@ -1098,10 +1175,18 @@ if(!gallery) return;
 const fullPrice = prompt("Full gallery price:", Number(gallery.full_gallery_price || 0).toFixed(2));
 if(fullPrice === null) return;
 
+const albumName = prompt("Album package name:", gallery.album_name || "Album Package");
+if(albumName === null) return;
+
+const albumPrice = prompt("Album package price:", Number(gallery.album_price || 0).toFixed(2));
+if(albumPrice === null) return;
+
 const { error } = await supabaseClient
 .from("client_galleries")
 .update({
-full_gallery_price: parseFloat(fullPrice || "0") || 0
+full_gallery_price: parseFloat(fullPrice || "0") || 0,
+album_name: albumName || "Album Package",
+album_price: parseFloat(albumPrice || "0") || 0
 })
 .eq("id", galleryId);
 
@@ -1128,7 +1213,7 @@ const watermarkEnabled = document.getElementById("watermarkUpload").value === "t
 const msg = document.getElementById("uploadMessage");
 
 const albumSelect = document.getElementById("uploadAlbumSelect");
-let albumId = albumSelect ? albumSelect.value.trim() : "";
+let albumId = albumSelect && albumSelect.value ? String(albumSelect.value).trim() : "";
 
 msg.textContent = "";
 
@@ -1142,7 +1227,13 @@ msg.textContent = "Choose at least one photo.";
 return;
 }
 
-/* IMPORTANT: verify album exists before saving it */
+/*
+IMPORTANT:
+Only send album_id if Supabase confirms that exact album exists
+inside the selected gallery. If the dropdown ever has a stale/bad value,
+this safely uploads as individual photos instead of breaking with a
+foreign key error.
+*/
 if(albumId){
 const { data: albumCheck, error: albumError } = await supabaseClient
 .from("photo_albums")
@@ -1152,8 +1243,10 @@ const { data: albumCheck, error: albumError } = await supabaseClient
 .maybeSingle();
 
 if(albumError || !albumCheck){
-msg.textContent = "That album selection is invalid. Refresh the page, select the album again, and upload.";
-return;
+console.warn("Invalid album selection ignored:", albumId, albumError);
+albumId = null;
+msg.textContent = "Album selection was invalid, so this upload will be saved as individual photos.";
+await new Promise(resolve => setTimeout(resolve, 700));
 }
 }else{
 albumId = null;
@@ -1224,13 +1317,11 @@ box.dataset.open = "false";
 box.innerHTML = "";
 }
 
+if(albumId){
+await viewAlbumPhotos(galleryId, albumId);
+}else{
 await viewPhotos(galleryId);
 }
-
-function getAlbumName(galleryId, albumId){
-if(!albumId) return "Individual";
-const album = (albumCache[galleryId] || []).find(a => a.id === albumId);
-return album ? album.album_name : "Album";
 }
 
 async function viewPhotos(galleryId){
@@ -1279,50 +1370,6 @@ div.innerHTML = `
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
 
-box.appendChild(div);
-});
-}
-
-async function viewAlbumPhotos(galleryId, albumId){
-currentGalleryId = galleryId;
-albumPhotoMode = albumId;
-
-const box = document.getElementById("photos-" + galleryId);
-if(!box) return;
-
-box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
-box.dataset.open = "true";
-
-await loadUploadAlbums(galleryId);
-
-const { data, error } = await supabaseClient
-.from("gallery_photos")
-.select("*")
-.eq("gallery_id", galleryId)
-.eq("album_id", albumId)
-.order("created_at", {ascending:true});
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
-return;
-}
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No photos in this album yet.</p>`;
-return;
-}
-
-currentPhotos = data;
-box.innerHTML = "";
-
-data.forEach((photo,index) => {
-const div = document.createElement("div");
-div.className = "photo";
-div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} • ${getAlbumName(galleryId, photo.album_id)} • $${Number(photo.price || 0).toFixed(2)}</span>
-<img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
-<button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
-`;
 box.appendChild(div);
 });
 }
