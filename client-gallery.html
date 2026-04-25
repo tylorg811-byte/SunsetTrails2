@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Client Gallery | Sunset Trails Photography</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Private client photo gallery for Sunset Trails Photography clients.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:Inter,sans-serif;
+background:#120b05;
+color:white;
+min-height:100vh;
+background:
+linear-gradient(rgba(18,11,5,.72),rgba(18,11,5,.9)),
+url('sunset-bg.jpg') center/cover fixed;
+}
+header{
+padding:22px 7%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(20,12,5,.55);
+backdrop-filter:blur(18px);
+border-bottom:1px solid rgba(255,204,120,.18);
+position:sticky;
+top:0;
+z-index:10;
+}
+.logo{
+font-family:'Playfair Display',serif;
+font-size:25px;
+color:#ffd38a;
+}
+header a{
+color:white;
+text-decoration:none;
+font-size:14px;
+opacity:.85;
+}
+.hero{
+padding:90px 7% 55px;
+text-align:center;
+}
+.hero h1{
+font-family:'Playfair Display',serif;
+font-size:clamp(42px,7vw,82px);
+line-height:1;
+color:#ffd38a;
+}
+.hero p{
+max-width:720px;
+margin:20px auto 0;
+color:#f5dcc0;
+line-height:1.7;
+}
+.access-box{
+width:min(620px,90%);
+margin:0 auto 65px;
+padding:30px;
+border-radius:28px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,211,138,.25);
+box-shadow:0 30px 80px rgba(0,0,0,.35);
+backdrop-filter:blur(18px);
+}
+.access-box label{
+display:block;
+font-weight:700;
+color:#ffd38a;
+margin-bottom:10px;
+}
+.access-box input{
+width:100%;
+padding:17px 18px;
+border:none;
+outline:none;
+border-radius:16px;
+background:rgba(255,255,255,.92);
+font-size:17px;
+}
+button{
+border:none;
+cursor:pointer;
+border-radius:999px;
+padding:15px 24px;
+font-weight:800;
+background:linear-gradient(135deg,#ffd38a,#c77b28);
+color:#1b0e04;
+box-shadow:0 15px 35px rgba(199,123,40,.32);
+}
+.access-box button{
+width:100%;
+margin-top:16px;
+font-size:16px;
+}
+.message{
+margin-top:14px;
+text-align:center;
+color:#ffd38a;
+}
+.gallery-wrap{
+display:none;
+padding:10px 7% 80px;
+}
+.gallery-top{
+display:flex;
+justify-content:space-between;
+gap:20px;
+align-items:flex-end;
+margin-bottom:28px;
+}
+.gallery-top h2{
+font-family:'Playfair Display',serif;
+font-size:clamp(34px,5vw,58px);
+color:#ffd38a;
+}
+.gallery-top p{
+color:#f7dfbf;
+margin-top:8px;
+}
+.actions{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
+.secondary{
+background:rgba(255,255,255,.1);
+color:white;
+border:1px solid rgba(255,255,255,.2);
+box-shadow:none;
+}
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:18px;
+}
+.card{
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,211,138,.18);
+border-radius:24px;
+overflow:hidden;
+box-shadow:0 24px 60px rgba(0,0,0,.28);
+}
+.card img{
+width:100%;
+height:320px;
+object-fit:cover;
+display:block;
+}
+.card-content{
+padding:16px;
+}
+.card-content p{
+color:#f3d9b9;
+font-size:14px;
+margin-bottom:14px;
+}
+.card-actions{
+display:flex;
+gap:10px;
+}
+.card-actions a{
+flex:1;
+text-align:center;
+text-decoration:none;
+border-radius:999px;
+padding:12px;
+font-weight:800;
+font-size:14px;
+}
+.view{
+background:rgba(255,255,255,.12);
+color:white;
+border:1px solid rgba(255,255,255,.18);
+}
+.download{
+background:linear-gradient(135deg,#ffd38a,#c77b28);
+color:#1b0e04;
+}
+.empty{
+text-align:center;
+padding:50px;
+color:#f5dcc0;
+border:1px dashed rgba(255,211,138,.25);
+border-radius:24px;
+}
+.lightbox{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.9);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:99;
+padding:25px;
+}
+.lightbox img{
+max-width:95%;
+max-height:85vh;
+border-radius:20px;
+}
+.close{
+position:absolute;
+top:22px;
+right:25px;
+font-size:34px;
+color:white;
+cursor:pointer;
+}
+@media(max-width:900px){
+.gallery-top{display:block}
+.actions{margin-top:18px}
+.grid{grid-template-columns:1fr 1fr}
+.card img{height:260px}
+}
+@media(max-width:600px){
+header{padding:18px 5%}
+.hero{padding:70px 5% 40px}
+.gallery-wrap{padding:10px 5% 60px}
+.grid{grid-template-columns:1fr}
+.card img{height:300px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">Sunset Trails Photography</div>
+<a href="index.html">Back to Website</a>
+</header>
+
+<section class="hero">
+<h1>Private Client Gallery</h1>
+<p>Enter your gallery access code below to view and download your photos.</p>
+</section>
+
+<div class="access-box" id="accessBox">
+<label>Gallery Access Code</label>
+<input id="codeInput" placeholder="Example: SUNSET-JONES-2026">
+<button onclick="loadGallery()">Open My Gallery</button>
+<div class="message" id="message"></div>
+</div>
+
+<section class="gallery-wrap" id="galleryWrap">
+<div class="gallery-top">
+<div>
+<h2 id="clientName">Client Gallery</h2>
+<p id="galleryNotes"></p>
+</div>
+<div class="actions">
+<button class="secondary" onclick="resetGallery()">Enter Different Code</button>
+<a id="paymentBtn" href="#" target="_blank" style="display:none;text-decoration:none;">
+<button>Purchase More</button>
+</a>
+</div>
+</div>
+
+<div class="grid" id="photoGrid"></div>
+</section>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+<span class="close">&times;</span>
+<img id="lightboxImg">
+</div>
+
+<script>
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function loadGallery(){
+const code = document.getElementById("codeInput").value.trim().toUpperCase();
+const message = document.getElementById("message");
+const grid = document.getElementById("photoGrid");
+
+message.textContent = "";
+grid.innerHTML = "";
+
+if(!code){
+message.textContent = "Please enter your gallery code.";
+return;
+}
+
+const { data: gallery, error } = await supabaseClient
+.from("client_galleries")
+.select("*")
+.eq("gallery_code", code)
+.eq("is_active", true)
+.single();
+
+if(error || !gallery){
+message.textContent = "No active gallery found with that code.";
+return;
+}
+
+const { data: photos, error: photoError } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id", gallery.id)
+.order("created_at", { ascending:true });
+
+document.getElementById("clientName").textContent = gallery.client_name + " Gallery";
+document.getElementById("galleryNotes").textContent = gallery.notes || "Your private photo collection is ready below.";
+
+if(gallery.payment_link){
+document.getElementById("paymentBtn").style.display = "inline-block";
+document.getElementById("paymentBtn").href = gallery.payment_link;
+}else{
+document.getElementById("paymentBtn").style.display = "none";
+}
+
+document.getElementById("accessBox").style.display = "none";
+document.getElementById("galleryWrap").style.display = "block";
+
+if(photoError || !photos || photos.length === 0){
+grid.innerHTML = `<div class="empty">No photos have been uploaded to this gallery yet.</div>`;
+return;
+}
+
+photos.forEach(photo => {
+const card = document.createElement("div");
+card.className = "card";
+card.innerHTML = `
+<img src="${photo.image_url}" alt="${photo.caption || 'Client photo'}" onclick="openLightbox('${photo.image_url}')">
+<div class="card-content">
+<p>${photo.caption || "Sunset Trails Photography"}</p>
+<div class="card-actions">
+<a class="view" href="${photo.image_url}" target="_blank">View</a>
+<a class="download" href="${photo.image_url}" download>Download</a>
+</div>
+</div>
+`;
+grid.appendChild(card);
+});
+}
+
+function resetGallery(){
+document.getElementById("galleryWrap").style.display = "none";
+document.getElementById("accessBox").style.display = "block";
+document.getElementById("codeInput").value = "";
+}
+
+function openLightbox(src){
+document.getElementById("lightboxImg").src = src;
+document.getElementById("lightbox").style.display = "flex";
+}
+
+function closeLightbox(){
+document.getElementById("lightbox").style.display = "none";
+}
+</script>
+
+</body>
+</html>
