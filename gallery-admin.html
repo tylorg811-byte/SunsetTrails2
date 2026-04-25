@@ -4,53 +4,380 @@
 <meta charset="UTF-8">
 <title>Gallery Admin | Sunset Trails Photography</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,sans-serif;background:#120b05;color:white;min-height:100vh;background:radial-gradient(circle at top,#5b2d0c,#120b05 55%,#050201)}
-header{padding:22px 7%;display:flex;justify-content:space-between;align-items:center;background:rgba(20,12,5,.58);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,204,120,.18);position:sticky;top:0;z-index:50}
-.logo{font-family:'Playfair Display',serif;font-size:25px;color:#ffd38a}
-.container{padding:50px 7%;max-width:1300px;margin:auto}
-h1,h2{font-family:'Playfair Display',serif;color:#ffd38a}
-h1{font-size:clamp(40px,6vw,70px);margin-bottom:10px}
-.sub{color:#f4d6ad;margin-bottom:34px;line-height:1.7}
-.panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,211,138,.22);border-radius:28px;padding:26px;box-shadow:0 25px 70px rgba(0,0,0,.28);backdrop-filter:blur(18px);margin-bottom:25px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-input,textarea,select{width:100%;padding:15px 16px;border:none;outline:none;border-radius:15px;background:rgba(255,255,255,.92);font-size:15px;font-family:Inter,sans-serif}
-textarea{min-height:105px;resize:vertical}
-label{display:block;font-weight:800;color:#ffd38a;margin-bottom:8px;font-size:14px}
-.field{margin-bottom:16px}
-button{border:none;cursor:pointer;border-radius:999px;padding:14px 22px;font-weight:900;background:linear-gradient(135deg,#ffd38a,#c77b28);color:#1b0e04;box-shadow:0 15px 35px rgba(199,123,40,.28)}
-.secondary{background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.18);box-shadow:none}
-.danger{background:#922020;color:white;box-shadow:none}
-.admin{display:none}
-.gallery-list{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-.gallery-card{padding:20px;border-radius:22px;background:rgba(255,255,255,.07);border:1px solid rgba(255,211,138,.18)}
-.gallery-card h3{color:#ffd38a;margin-bottom:8px;font-size:22px}
-.gallery-card p{color:#f3d9b9;font-size:14px;line-height:1.6}
-.code{display:inline-block;margin:12px 0;padding:8px 12px;border-radius:999px;background:rgba(255,211,138,.16);color:#ffd38a;font-weight:900;letter-spacing:.5px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.message{margin-top:14px;color:#ffd38a;font-weight:700}
-.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,180px));gap:12px;margin-top:18px;max-width:100%}
-.photo{width:180px;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);position:relative}
-.photo img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
-.photo button{position:absolute;bottom:0;left:0;width:100%;padding:8px;font-size:12px;border-radius:0;background:rgba(146,32,32,.95);color:white}
-.badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#ffd38a;font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px}
-.requests{display:grid;gap:12px}
-.request{padding:16px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,211,138,.14)}
-.request p{color:#f3d9b9;margin-top:4px;line-height:1.5}
-.photo-viewer{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;display:none;align-items:center;justify-content:center;padding:30px}
-.viewer-box{max-width:92%;max-height:90vh;text-align:center}
-.viewer-box img{max-width:100%;max-height:72vh;object-fit:contain;border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
-.viewer-box p{margin-top:14px;color:#ffd38a;font-weight:800}
-.viewer-close{position:absolute;top:22px;right:30px;font-size:46px;color:white;cursor:pointer;z-index:10001}
-.viewer-arrow{position:absolute;top:50%;transform:translateY(-50%);width:58px;height:58px;border-radius:50%;font-size:46px;line-height:1;display:flex;align-items:center;justify-content:center;background:rgba(255,211,138,.18);color:#ffd38a;border:1px solid rgba(255,211,138,.35);box-shadow:none;z-index:10000}
-.viewer-arrow.left{left:28px}.viewer-arrow.right{right:28px}
-.viewer-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:15px}
-@media(max-width:900px){.grid,.gallery-list{grid-template-columns:1fr}}
-@media(max-width:600px){.container{padding:35px 5%}header{padding:18px 5%}.photo{width:140px}.photos{grid-template-columns:repeat(auto-fill,minmax(130px,140px))}.viewer-arrow{width:46px;height:46px;font-size:36px}.viewer-arrow.left{left:10px}.viewer-arrow.right{right:10px}.viewer-close{top:14px;right:20px;font-size:40px}}
+
+body{
+font-family:Inter,sans-serif;
+background:#100804;
+color:white;
+min-height:100vh;
+background:
+radial-gradient(circle at 20% 0%,rgba(255,196,101,.18),transparent 28%),
+radial-gradient(circle at 80% 8%,rgba(205,111,30,.14),transparent 30%),
+radial-gradient(circle at top,#5b2d0c,#120b05 55%,#050201);
+}
+
+header{
+padding:22px 7%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(20,12,5,.6);
+backdrop-filter:blur(20px);
+border-bottom:1px solid rgba(255,204,120,.2);
+position:sticky;
+top:0;
+z-index:50;
+}
+
+.logo{
+font-family:'Playfair Display',serif;
+font-size:26px;
+color:#ffd38a;
+}
+
+.container{
+padding:50px 7%;
+max-width:1350px;
+margin:auto;
+}
+
+h1,h2{
+font-family:'Playfair Display',serif;
+color:#ffd38a;
+}
+
+h1{
+font-size:clamp(42px,6vw,74px);
+margin-bottom:10px;
+line-height:1;
+}
+
+.sub{
+color:#f4d6ad;
+margin-bottom:34px;
+line-height:1.7;
+}
+
+.panel{
+background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045));
+border:1px solid rgba(255,211,138,.23);
+border-radius:30px;
+padding:28px;
+box-shadow:0 28px 80px rgba(0,0,0,.32);
+backdrop-filter:blur(20px);
+margin-bottom:25px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+
+input,textarea,select{
+width:100%;
+padding:15px 16px;
+border:none;
+outline:none;
+border-radius:16px;
+background:rgba(255,255,255,.94);
+font-size:15px;
+font-family:Inter,sans-serif;
+}
+
+textarea{
+min-height:105px;
+resize:vertical;
+}
+
+label{
+display:block;
+font-weight:900;
+color:#ffd38a;
+margin-bottom:8px;
+font-size:14px;
+}
+
+.field{
+margin-bottom:16px;
+}
+
+button{
+border:none;
+cursor:pointer;
+border-radius:999px;
+padding:14px 22px;
+font-weight:900;
+background:linear-gradient(135deg,#ffd38a,#c77b28);
+color:#1b0e04;
+box-shadow:0 15px 35px rgba(199,123,40,.3);
+}
+
+.secondary{
+background:rgba(255,255,255,.1);
+color:white;
+border:1px solid rgba(255,255,255,.18);
+box-shadow:none;
+}
+
+.danger{
+background:#922020;
+color:white;
+box-shadow:none;
+}
+
+.admin{
+display:none;
+}
+
+.stat-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+margin-bottom:25px;
+}
+
+.stat{
+padding:18px;
+border-radius:24px;
+background:rgba(255,255,255,.075);
+border:1px solid rgba(255,211,138,.18);
+}
+
+.stat strong{
+display:block;
+font-size:30px;
+color:#ffd38a;
+}
+
+.stat span{
+font-size:13px;
+color:#f3d9b9;
+font-weight:800;
+}
+
+.gallery-list{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:18px;
+}
+
+.gallery-card{
+padding:21px;
+border-radius:24px;
+background:rgba(255,255,255,.075);
+border:1px solid rgba(255,211,138,.18);
+}
+
+.gallery-card h3{
+color:#ffd38a;
+margin-bottom:8px;
+font-size:24px;
+font-family:'Playfair Display',serif;
+}
+
+.gallery-card p{
+color:#f3d9b9;
+font-size:14px;
+line-height:1.6;
+}
+
+.code{
+display:inline-block;
+margin:12px 0;
+padding:8px 12px;
+border-radius:999px;
+background:rgba(255,211,138,.16);
+color:#ffd38a;
+font-weight:900;
+letter-spacing:.5px;
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+
+.message{
+margin-top:14px;
+color:#ffd38a;
+font-weight:800;
+}
+
+.photos{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(140px,180px));
+gap:12px;
+margin-top:18px;
+max-width:100%;
+}
+
+.photo{
+width:180px;
+aspect-ratio:1/1;
+border-radius:16px;
+overflow:hidden;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.12);
+position:relative;
+}
+
+.photo img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+cursor:pointer;
+}
+
+.photo button{
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+padding:8px;
+font-size:12px;
+border-radius:0;
+background:rgba(146,32,32,.95);
+color:white;
+}
+
+.badge{
+position:absolute;
+top:8px;
+left:8px;
+background:rgba(0,0,0,.68);
+color:#ffd38a;
+font-size:11px;
+font-weight:900;
+padding:5px 8px;
+border-radius:999px;
+}
+
+.requests{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+}
+
+.request{
+padding:16px;
+border-radius:20px;
+background:rgba(255,255,255,.075);
+border:1px solid rgba(255,211,138,.15);
+}
+
+.request p{
+color:#f3d9b9;
+margin-top:4px;
+line-height:1.5;
+font-size:14px;
+}
+
+.request img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:16px;
+margin-top:10px;
+}
+
+.photo-viewer{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.94);
+z-index:9999;
+display:none;
+align-items:center;
+justify-content:center;
+padding:30px;
+}
+
+.viewer-box{
+max-width:92%;
+max-height:90vh;
+text-align:center;
+}
+
+.viewer-box img{
+max-width:100%;
+max-height:72vh;
+object-fit:contain;
+border-radius:22px;
+box-shadow:0 30px 90px rgba(0,0,0,.6);
+}
+
+.viewer-box p{
+margin-top:14px;
+color:#ffd38a;
+font-weight:900;
+}
+
+.viewer-close{
+position:absolute;
+top:22px;
+right:30px;
+font-size:46px;
+color:white;
+cursor:pointer;
+z-index:10001;
+}
+
+.viewer-arrow{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+width:58px;
+height:58px;
+border-radius:50%;
+font-size:46px;
+line-height:1;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(255,211,138,.18);
+color:#ffd38a;
+border:1px solid rgba(255,211,138,.35);
+box-shadow:none;
+z-index:10000;
+}
+
+.viewer-arrow.left{left:28px}
+.viewer-arrow.right{right:28px}
+
+.viewer-controls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+margin-top:15px;
+}
+
+@media(max-width:1000px){
+.stat-grid{grid-template-columns:repeat(2,1fr)}
+.grid,.gallery-list,.requests{grid-template-columns:1fr}
+}
+
+@media(max-width:600px){
+.container{padding:35px 5%}
+header{padding:18px 5%}
+.logo{font-size:21px}
+.photo{width:140px}
+.photos{grid-template-columns:repeat(auto-fill,minmax(130px,140px))}
+.viewer-arrow{width:46px;height:46px;font-size:36px}
+.viewer-arrow.left{left:10px}
+.viewer-arrow.right{right:10px}
+.viewer-close{top:14px;right:20px;font-size:40px}
+.stat-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -65,9 +392,18 @@ button{border:none;cursor:pointer;border-radius:999px;padding:14px 22px;font-wei
 
 <section id="loginPanel" class="panel">
 <h1>Gallery Admin</h1>
-<p class="sub">Log in to create client galleries, upload photos, approve finals, watermark proofs, and view print requests.</p>
-<div class="field"><label>Email</label><input id="email" type="email" placeholder="admin@email.com"></div>
-<div class="field"><label>Password</label><input id="password" type="password" placeholder="Password"></div>
+<p class="sub">Log in to manage galleries, proof images, favorites, print requests, and PayPal purchase records.</p>
+
+<div class="field">
+<label>Email</label>
+<input id="email" type="email" placeholder="admin@email.com">
+</div>
+
+<div class="field">
+<label>Password</label>
+<input id="password" type="password" placeholder="Password">
+</div>
+
 <button onclick="login()">Login</button>
 <div class="message" id="loginMessage"></div>
 </section>
@@ -75,35 +411,94 @@ button{border:none;cursor:pointer;border-radius:999px;padding:14px 22px;font-wei
 <section id="adminPanel" class="admin">
 
 <h1>Client Gallery Console</h1>
-<p class="sub">Upload proof photos with watermarks, approve final photos, and manage purchase/request options.</p>
+<p class="sub">A premium proofing dashboard for uploads, approvals, favorites, requests, and orders.</p>
+
+<div class="stat-grid">
+<div class="stat"><strong id="statGalleries">0</strong><span>Galleries</span></div>
+<div class="stat"><strong id="statFavorites">0</strong><span>Favorites</span></div>
+<div class="stat"><strong id="statRequests">0</strong><span>Requests</span></div>
+<div class="stat"><strong id="statOrders">0</strong><span>Orders</span></div>
+</div>
 
 <div class="panel">
 <h2>Create New Gallery</h2><br>
+
 <div class="grid">
-<div class="field"><label>Client Name</label><input id="clientName" placeholder="Jones Family"></div>
-<div class="field"><label>Gallery Code</label><input id="galleryCode" placeholder="SUNSET-JONES-2026"></div>
+<div class="field">
+<label>Client Name</label>
+<input id="clientName" placeholder="Jones Family">
 </div>
+
+<div class="field">
+<label>Gallery Code</label>
+<input id="galleryCode" placeholder="SUNSET-JONES-2026">
+</div>
+</div>
+
 <div class="grid">
-<div class="field"><label>Package Name</label><input id="packageName" placeholder="Wedding / Family / Senior Session"></div>
-<div class="field"><label>Payment Link</label><input id="paymentLink" placeholder="PayPal / Stripe link later"></div>
+<div class="field">
+<label>Package Name</label>
+<input id="packageName" placeholder="Wedding / Family / Senior Session">
 </div>
-<div class="field"><label>Gallery Notes</label><textarea id="notes" placeholder="Your proof gallery is ready. Watermarked images are previews. Approved finals can be downloaded."></textarea></div>
+
+<div class="field">
+<label>Optional Payment Link</label>
+<input id="paymentLink" placeholder="Optional PayPal / Stripe link">
+</div>
+</div>
+
+<div class="field">
+<label>Gallery Notes</label>
+<textarea id="notes" placeholder="Your proof gallery is ready. Watermarked images are previews. Approved finals can be downloaded."></textarea>
+</div>
+
 <button onclick="createGallery()">Create Gallery</button>
 <div class="message" id="createMessage"></div>
 </div>
 
 <div class="panel">
 <h2>Upload Photos</h2><br>
-<div class="field"><label>Select Gallery</label><select id="gallerySelect"></select></div>
-<div class="field"><label>Choose Photos</label><input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" multiple></div>
-<div class="grid">
-<div class="field"><label>Caption Optional</label><input id="caption" placeholder="Sunset Trails Photography"></div>
-<div class="field"><label>Price For Extra Print / Digital</label><input id="photoPrice" type="number" step="0.01" placeholder="25.00"></div>
+
+<div class="field">
+<label>Select Gallery</label>
+<select id="gallerySelect"></select>
 </div>
-<div class="grid">
-<div class="field"><label>Upload As</label><select id="approvedUpload"><option value="false">Proof / Not Approved / Watermarked</option><option value="true">Approved Final / No Watermark</option></select></div>
-<div class="field"><label>Watermark</label><select id="watermarkUpload"><option value="true">Watermark On</option><option value="false">Watermark Off</option></select></div>
+
+<div class="field">
+<label>Choose Photos</label>
+<input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" multiple>
 </div>
+
+<div class="grid">
+<div class="field">
+<label>Caption Optional</label>
+<input id="caption" placeholder="Sunset Trails Photography">
+</div>
+
+<div class="field">
+<label>Price For Extra Photo / Print</label>
+<input id="photoPrice" type="number" step="0.01" placeholder="25.00">
+</div>
+</div>
+
+<div class="grid">
+<div class="field">
+<label>Upload As</label>
+<select id="approvedUpload">
+<option value="false">Proof / Not Approved / Watermarked</option>
+<option value="true">Approved Final / No Watermark</option>
+</select>
+</div>
+
+<div class="field">
+<label>Watermark</label>
+<select id="watermarkUpload">
+<option value="true">Watermark On</option>
+<option value="false">Watermark Off</option>
+</select>
+</div>
+</div>
+
 <button onclick="uploadPhotos()">Upload Photos</button>
 <div class="message" id="uploadMessage"></div>
 </div>
@@ -114,10 +509,24 @@ button{border:none;cursor:pointer;border-radius:999px;padding:14px 22px;font-wei
 </div>
 
 <div class="panel">
-<h2>Client Requests / Print Orders</h2><br>
+<h2>Favorites</h2><br>
+<button onclick="loadFavorites()">Refresh Favorites</button>
+<br><br>
+<div class="requests" id="favoritesList"></div>
+</div>
+
+<div class="panel">
+<h2>Client Requests / Print Requests</h2><br>
 <button onclick="loadRequests()">Refresh Requests</button>
 <br><br>
 <div class="requests" id="requestsList"></div>
+</div>
+
+<div class="panel">
+<h2>PayPal Orders</h2><br>
+<button onclick="loadOrders()">Refresh Orders</button>
+<br><br>
+<div class="requests" id="ordersList"></div>
 </div>
 
 </section>
@@ -126,21 +535,25 @@ button{border:none;cursor:pointer;border-radius:999px;padding:14px 22px;font-wei
 <div id="photoViewer" class="photo-viewer">
 <span class="viewer-close" onclick="closePhotoViewer()">×</span>
 <button class="viewer-arrow left" onclick="prevPhoto()">‹</button>
+
 <div class="viewer-box" id="viewerBox">
 <img id="viewerImg" src="">
 <p id="viewerCount"></p>
+
 <div class="viewer-controls">
 <button onclick="toggleApproved()">Toggle Approved / Proof</button>
 <button onclick="toggleWatermark()">Toggle Watermark</button>
 <button class="danger" onclick="deleteCurrentPhoto()">Delete Photo</button>
 </div>
 </div>
+
 <button class="viewer-arrow right" onclick="nextPhoto()">›</button>
 </div>
 
 <script>
 const SUPABASE_URL = "https://mcjqykkjyvhcqlfjwzpo.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8";
+
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allGalleries = [];
@@ -159,242 +572,583 @@ async function login(){
 const email = document.getElementById("email").value.trim();
 const password = document.getElementById("password").value.trim();
 const msg = document.getElementById("loginMessage");
+
 msg.textContent = "";
-if(!email || !password){msg.textContent="Please enter your email and password.";return;}
-const { error } = await supabaseClient.auth.signInWithPassword({email,password});
-if(error){msg.textContent=error.message;return;}
+
+if(!email || !password){
+msg.textContent = "Please enter your email and password.";
+return;
+}
+
+const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+if(error){
+msg.textContent = error.message;
+return;
+}
+
 showAdmin();
 }
 
-async function logout(){await supabaseClient.auth.signOut();location.reload();}
+async function logout(){
+await supabaseClient.auth.signOut();
+location.reload();
+}
 
 async function showAdmin(){
-document.getElementById("loginPanel").style.display="none";
-document.getElementById("adminPanel").style.display="block";
+document.getElementById("loginPanel").style.display = "none";
+document.getElementById("adminPanel").style.display = "block";
+await refreshAll();
+}
+
+async function refreshAll(){
 await loadGalleries();
+await loadFavorites();
 await loadRequests();
+await loadOrders();
 }
 
 function makeCode(name){
 return "SUNSET-" + name.trim().replace(/[^a-z0-9]/gi,"-").replace(/-+/g,"-").toUpperCase() + "-" + new Date().getFullYear();
 }
 
-document.getElementById("clientName").addEventListener("input",()=>{
-const codeInput=document.getElementById("galleryCode");
-if(!codeInput.value.trim()) codeInput.value=makeCode(document.getElementById("clientName").value);
+document.getElementById("clientName").addEventListener("input", () => {
+const codeInput = document.getElementById("galleryCode");
+if(!codeInput.value.trim()){
+codeInput.value = makeCode(document.getElementById("clientName").value);
+}
 });
 
 async function createGallery(){
-const client_name=document.getElementById("clientName").value.trim();
-const gallery_code=document.getElementById("galleryCode").value.trim().toUpperCase();
-const package_name=document.getElementById("packageName").value.trim();
-const payment_link=document.getElementById("paymentLink").value.trim();
-const notes=document.getElementById("notes").value.trim();
-const msg=document.getElementById("createMessage");
-msg.textContent="";
-if(!client_name||!gallery_code){msg.textContent="Client name and gallery code are required.";return;}
-const { error } = await supabaseClient.from("client_galleries").insert([{client_name,gallery_code,package_name,payment_link,notes}]);
-if(error){msg.textContent=error.message;return;}
-msg.textContent="Gallery created successfully.";
-document.getElementById("clientName").value="";
-document.getElementById("galleryCode").value="";
-document.getElementById("packageName").value="";
-document.getElementById("paymentLink").value="";
-document.getElementById("notes").value="";
+const client_name = document.getElementById("clientName").value.trim();
+const gallery_code = document.getElementById("galleryCode").value.trim().toUpperCase();
+const package_name = document.getElementById("packageName").value.trim();
+const payment_link = document.getElementById("paymentLink").value.trim();
+const notes = document.getElementById("notes").value.trim();
+const msg = document.getElementById("createMessage");
+
+msg.textContent = "";
+
+if(!client_name || !gallery_code){
+msg.textContent = "Client name and gallery code are required.";
+return;
+}
+
+const { error } = await supabaseClient
+.from("client_galleries")
+.insert([{ client_name, gallery_code, package_name, payment_link, notes }]);
+
+if(error){
+msg.textContent = error.message;
+return;
+}
+
+msg.textContent = "Gallery created successfully.";
+
+document.getElementById("clientName").value = "";
+document.getElementById("galleryCode").value = "";
+document.getElementById("packageName").value = "";
+document.getElementById("paymentLink").value = "";
+document.getElementById("notes").value = "";
+
 await loadGalleries();
 }
 
 async function loadGalleries(){
-const { data,error } = await supabaseClient.from("client_galleries").select("*").order("created_at",{ascending:false});
-if(error){console.log(error);return;}
-allGalleries=data||[];
-const select=document.getElementById("gallerySelect");
-const list=document.getElementById("galleryList");
-select.innerHTML="";
-list.innerHTML="";
-if(!allGalleries.length){list.innerHTML=`<p style="color:#f3d9b9;">No galleries created yet.</p>`;return;}
-allGalleries.forEach(gallery=>{
-const opt=document.createElement("option");
-opt.value=gallery.id;
-opt.textContent=gallery.client_name+" — "+gallery.gallery_code;
+const { data, error } = await supabaseClient
+.from("client_galleries")
+.select("*")
+.order("created_at", { ascending:false });
+
+if(error){
+console.log(error);
+return;
+}
+
+allGalleries = data || [];
+
+document.getElementById("statGalleries").textContent = allGalleries.length;
+
+const select = document.getElementById("gallerySelect");
+const list = document.getElementById("galleryList");
+
+select.innerHTML = "";
+list.innerHTML = "";
+
+if(!allGalleries.length){
+list.innerHTML = `<p style="color:#f3d9b9;">No galleries created yet.</p>`;
+return;
+}
+
+allGalleries.forEach(gallery => {
+const opt = document.createElement("option");
+opt.value = gallery.id;
+opt.textContent = gallery.client_name + " — " + gallery.gallery_code;
 select.appendChild(opt);
-const card=document.createElement("div");
-card.className="gallery-card";
-card.innerHTML=`
+
+const card = document.createElement("div");
+card.className = "gallery-card";
+
+card.innerHTML = `
 <h3>${gallery.client_name}</h3>
 <p>${gallery.package_name || "No package listed"}</p>
 <span class="code">${gallery.gallery_code}</span>
 <p>${gallery.notes || ""}</p>
+
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
-<button class="secondary" onclick="viewPhotos('${gallery.id}', event)">View Photos</button>
+<button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
 </div>
+
 <div class="photos" id="photos-${gallery.id}" data-open="false"></div>
 `;
+
 list.appendChild(card);
 });
 }
 
-function copyCode(code){navigator.clipboard.writeText(code);alert("Copied: "+code);}
+function copyCode(code){
+navigator.clipboard.writeText(code);
+alert("Copied: " + code);
+}
 
 async function uploadPhotos(){
-const galleryId=document.getElementById("gallerySelect").value;
-const files=Array.from(document.getElementById("photoFiles").files||[]);
-const caption=document.getElementById("caption").value.trim();
-const price=parseFloat(document.getElementById("photoPrice").value || "0");
-const isApproved=document.getElementById("approvedUpload").value==="true";
-const watermarkEnabled=document.getElementById("watermarkUpload").value==="true";
-const msg=document.getElementById("uploadMessage");
-msg.textContent="";
-if(!galleryId){msg.textContent="Please choose a gallery first.";return;}
-if(!files.length){msg.textContent="Please select at least one photo.";return;}
-msg.textContent="Uploading photos... Please wait.";
-for(const file of files){
-if(!file||file.size===0){msg.textContent="One selected file is empty. Try a normal JPG or PNG.";return;}
-const fileExt=(file.name.split(".").pop()||"jpg").toLowerCase();
-const filePath=`${galleryId}/${crypto.randomUUID()}.${fileExt}`;
-const bytes=new Uint8Array(await file.arrayBuffer());
-const { error:uploadError } = await supabaseClient.storage.from("gallery-photos").upload(filePath,bytes,{contentType:file.type||"image/jpeg",cacheControl:"3600",upsert:false});
-if(uploadError){msg.textContent="Upload error: "+uploadError.message;return;}
-const { data:publicData } = supabaseClient.storage.from("gallery-photos").getPublicUrl(filePath);
-const { error:dbError } = await supabaseClient.from("gallery_photos").insert([{gallery_id:galleryId,image_url:publicData.publicUrl,file_path:filePath,caption:caption||"Sunset Trails Photography",is_approved:isApproved,watermark_enabled:watermarkEnabled,price:price||0}]);
-if(dbError){msg.textContent="Database error: "+dbError.message;return;}
+const galleryId = document.getElementById("gallerySelect").value;
+const files = Array.from(document.getElementById("photoFiles").files || []);
+const caption = document.getElementById("caption").value.trim();
+const price = parseFloat(document.getElementById("photoPrice").value || "0");
+const isApproved = document.getElementById("approvedUpload").value === "true";
+const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
+const msg = document.getElementById("uploadMessage");
+
+msg.textContent = "";
+
+if(!galleryId){
+msg.textContent = "Please choose a gallery first.";
+return;
 }
-document.getElementById("photoFiles").value="";
-document.getElementById("caption").value="";
-document.getElementById("photoPrice").value="";
-msg.textContent="Photos uploaded successfully.";
-const box=document.getElementById("photos-"+galleryId);
-if(box){box.dataset.open="false";box.innerHTML="";}
+
+if(!files.length){
+msg.textContent = "Please select at least one photo.";
+return;
+}
+
+msg.textContent = "Uploading photos... Please wait.";
+
+for(const file of files){
+if(!file || file.size === 0){
+msg.textContent = "One selected file is empty. Try a normal JPG or PNG.";
+return;
+}
+
+const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
+const filePath = `${galleryId}/${crypto.randomUUID()}.${fileExt}`;
+const bytes = new Uint8Array(await file.arrayBuffer());
+
+const { error: uploadError } = await supabaseClient.storage
+.from("gallery-photos")
+.upload(filePath, bytes, {
+contentType: file.type || "image/jpeg",
+cacheControl: "3600",
+upsert: false
+});
+
+if(uploadError){
+msg.textContent = "Upload error: " + uploadError.message;
+return;
+}
+
+const { data: publicData } = supabaseClient.storage
+.from("gallery-photos")
+.getPublicUrl(filePath);
+
+const { error: dbError } = await supabaseClient
+.from("gallery_photos")
+.insert([{
+gallery_id: galleryId,
+image_url: publicData.publicUrl,
+file_path: filePath,
+caption: caption || "Sunset Trails Photography",
+is_approved: isApproved,
+watermark_enabled: watermarkEnabled,
+price: price || 0
+}]);
+
+if(dbError){
+msg.textContent = "Database error: " + dbError.message;
+return;
+}
+}
+
+document.getElementById("photoFiles").value = "";
+document.getElementById("caption").value = "";
+document.getElementById("photoPrice").value = "";
+
+msg.textContent = "Photos uploaded successfully.";
+
+const box = document.getElementById("photos-" + galleryId);
+if(box){
+box.dataset.open = "false";
+box.innerHTML = "";
+}
+
 await viewPhotos(galleryId);
 }
 
-async function viewPhotos(galleryId, e){
-currentGalleryId=galleryId;
-const box=document.getElementById("photos-"+galleryId);
-if(box.dataset.open==="true"){box.innerHTML="";box.dataset.open="false";return;}
-box.innerHTML=`<p style="color:#f3d9b9;">Loading photos...</p>`;
-const { data,error } = await supabaseClient.from("gallery_photos").select("*").eq("gallery_id",galleryId).order("created_at",{ascending:true});
-if(error){box.innerHTML=`<p style="color:#ffd38a;">${error.message}</p>`;return;}
-if(!data||!data.length){box.innerHTML=`<p style="color:#f3d9b9;">No photos uploaded yet.</p>`;box.dataset.open="true";return;}
-box.innerHTML="";
-box.dataset.open="true";
-data.forEach((photo,index)=>{
-const div=document.createElement("div");
-div.className="photo";
-div.innerHTML=`
-<span class="badge">${photo.is_approved ? "Approved" : "Proof"}</span>
+async function viewPhotos(galleryId){
+currentGalleryId = galleryId;
+const box = document.getElementById("photos-" + galleryId);
+
+if(box.dataset.open === "true"){
+box.innerHTML = "";
+box.dataset.open = "false";
+return;
+}
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading photos...</p>`;
+
+const { data, error } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id", galleryId)
+.order("created_at", { ascending:true });
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No photos uploaded yet.</p>`;
+box.dataset.open = "true";
+return;
+}
+
+box.innerHTML = "";
+box.dataset.open = "true";
+
+data.forEach((photo,index) => {
+const div = document.createElement("div");
+div.className = "photo";
+
+div.innerHTML = `
+<span class="badge">${photo.is_approved ? "Approved" : "Proof"} • $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openPhotoViewerFromGrid('${galleryId}',${index})">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
+
 box.appendChild(div);
 });
 }
 
 async function openPhotoViewerFromGrid(galleryId,index){
-currentGalleryId=galleryId;
-const { data,error } = await supabaseClient.from("gallery_photos").select("*").eq("gallery_id",galleryId).order("created_at",{ascending:true});
-if(error||!data||!data.length){alert("Could not open photos.");return;}
-currentPhotos=data;
-currentPhotoIndex=index;
+currentGalleryId = galleryId;
+
+const { data,error } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id", galleryId)
+.order("created_at", { ascending:true });
+
+if(error || !data || !data.length){
+alert("Could not open photos.");
+return;
+}
+
+currentPhotos = data;
+currentPhotoIndex = index;
 openPhotoViewer();
 }
 
 function openPhotoViewer(){
-if(!currentPhotos.length)return;
-const photo=currentPhotos[currentPhotoIndex];
-document.getElementById("viewerImg").src=photo.image_url;
-document.getElementById("viewerCount").textContent=(currentPhotoIndex+1)+" / "+currentPhotos.length+" — "+(photo.is_approved?"Approved Final":"Proof / Watermarked")+" — Watermark: "+(photo.watermark_enabled?"On":"Off");
-document.getElementById("photoViewer").style.display="flex";
+if(!currentPhotos.length) return;
+
+const photo = currentPhotos[currentPhotoIndex];
+
+document.getElementById("viewerImg").src = photo.image_url;
+document.getElementById("viewerCount").textContent =
+(currentPhotoIndex + 1) + " / " + currentPhotos.length +
+" — " + (photo.is_approved ? "Approved Final" : "Proof / Watermarked") +
+" — Watermark: " + (photo.watermark_enabled ? "On" : "Off") +
+" — Price: $" + Number(photo.price || 0).toFixed(2);
+
+document.getElementById("photoViewer").style.display = "flex";
 }
 
-function closePhotoViewer(){document.getElementById("photoViewer").style.display="none";}
-function nextPhoto(){if(!currentPhotos.length)return;currentPhotoIndex++;if(currentPhotoIndex>=currentPhotos.length)currentPhotoIndex=0;openPhotoViewer();}
-function prevPhoto(){if(!currentPhotos.length)return;currentPhotoIndex--;if(currentPhotoIndex<0)currentPhotoIndex=currentPhotos.length-1;openPhotoViewer();}
+function closePhotoViewer(){
+document.getElementById("photoViewer").style.display = "none";
+}
+
+function nextPhoto(){
+if(!currentPhotos.length) return;
+currentPhotoIndex++;
+if(currentPhotoIndex >= currentPhotos.length) currentPhotoIndex = 0;
+openPhotoViewer();
+}
+
+function prevPhoto(){
+if(!currentPhotos.length) return;
+currentPhotoIndex--;
+if(currentPhotoIndex < 0) currentPhotoIndex = currentPhotos.length - 1;
+openPhotoViewer();
+}
 
 async function toggleApproved(){
-const photo=currentPhotos[currentPhotoIndex];
-const newValue=!photo.is_approved;
-await supabaseClient.from("gallery_photos").update({is_approved:newValue}).eq("id",photo.id);
-currentPhotos[currentPhotoIndex].is_approved=newValue;
+const photo = currentPhotos[currentPhotoIndex];
+const newValue = !photo.is_approved;
+
+await supabaseClient
+.from("gallery_photos")
+.update({ is_approved: newValue })
+.eq("id", photo.id);
+
+currentPhotos[currentPhotoIndex].is_approved = newValue;
 openPhotoViewer();
-const box=document.getElementById("photos-"+currentGalleryId);
-if(box){box.dataset.open="false";box.innerHTML="";viewPhotos(currentGalleryId);}
+
+const box = document.getElementById("photos-" + currentGalleryId);
+if(box){
+box.dataset.open = "false";
+box.innerHTML = "";
+viewPhotos(currentGalleryId);
+}
 }
 
 async function toggleWatermark(){
-const photo=currentPhotos[currentPhotoIndex];
-const newValue=!photo.watermark_enabled;
-await supabaseClient.from("gallery_photos").update({watermark_enabled:newValue}).eq("id",photo.id);
-currentPhotos[currentPhotoIndex].watermark_enabled=newValue;
+const photo = currentPhotos[currentPhotoIndex];
+const newValue = !photo.watermark_enabled;
+
+await supabaseClient
+.from("gallery_photos")
+.update({ watermark_enabled: newValue })
+.eq("id", photo.id);
+
+currentPhotos[currentPhotoIndex].watermark_enabled = newValue;
 openPhotoViewer();
 }
 
 async function deleteCurrentPhoto(){
-if(!currentPhotos.length)return;
-const photo=currentPhotos[currentPhotoIndex];
-if(!confirm("Delete this photo?"))return;
-await supabaseClient.storage.from("gallery-photos").remove([photo.file_path]);
-await supabaseClient.from("gallery_photos").delete().eq("id",photo.id);
+if(!currentPhotos.length) return;
+
+const photo = currentPhotos[currentPhotoIndex];
+
+if(!confirm("Delete this photo?")) return;
+
+await supabaseClient.storage
+.from("gallery-photos")
+.remove([photo.file_path]);
+
+await supabaseClient
+.from("gallery_photos")
+.delete()
+.eq("id", photo.id);
+
 currentPhotos.splice(currentPhotoIndex,1);
-if(!currentPhotos.length){closePhotoViewer();return;}
-if(currentPhotoIndex>=currentPhotos.length)currentPhotoIndex=currentPhotos.length-1;
+
+if(!currentPhotos.length){
+closePhotoViewer();
+return;
+}
+
+if(currentPhotoIndex >= currentPhotos.length){
+currentPhotoIndex = currentPhotos.length - 1;
+}
+
 openPhotoViewer();
-const box=document.getElementById("photos-"+currentGalleryId);
-if(box){box.dataset.open="false";box.innerHTML="";viewPhotos(currentGalleryId);}
+
+const box = document.getElementById("photos-" + currentGalleryId);
+if(box){
+box.dataset.open = "false";
+box.innerHTML = "";
+viewPhotos(currentGalleryId);
+}
 }
 
 async function deletePhotoFromGrid(photoId,filePath,galleryId){
-if(!confirm("Delete this photo?"))return;
-await supabaseClient.storage.from("gallery-photos").remove([filePath]);
-await supabaseClient.from("gallery_photos").delete().eq("id",photoId);
-const box=document.getElementById("photos-"+galleryId);
-if(box){box.dataset.open="false";box.innerHTML="";}
+if(!confirm("Delete this photo?")) return;
+
+await supabaseClient.storage
+.from("gallery-photos")
+.remove([filePath]);
+
+await supabaseClient
+.from("gallery_photos")
+.delete()
+.eq("id", photoId);
+
+const box = document.getElementById("photos-" + galleryId);
+if(box){
+box.dataset.open = "false";
+box.innerHTML = "";
+}
+
 await viewPhotos(galleryId);
 }
 
 async function deleteGallery(galleryId){
-if(!confirm("Delete this whole gallery and its photos?"))return;
-const { data:photos } = await supabaseClient.from("gallery_photos").select("file_path").eq("gallery_id",galleryId);
-if(photos&&photos.length) await supabaseClient.storage.from("gallery-photos").remove(photos.map(p=>p.file_path));
-await supabaseClient.from("client_galleries").delete().eq("id",galleryId);
-await loadGalleries();
-await loadRequests();
+if(!confirm("Delete this whole gallery and its photos?")) return;
+
+const { data: photos } = await supabaseClient
+.from("gallery_photos")
+.select("file_path")
+.eq("gallery_id", galleryId);
+
+if(photos && photos.length){
+await supabaseClient.storage
+.from("gallery-photos")
+.remove(photos.map(p => p.file_path));
 }
 
-async function loadRequests(){
-const box=document.getElementById("requestsList");
-box.innerHTML=`<p style="color:#f3d9b9;">Loading requests...</p>`;
-const { data,error } = await supabaseClient.from("gallery_requests").select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)").order("created_at",{ascending:false});
-if(error){box.innerHTML=`<p style="color:#ffd38a;">${error.message}</p>`;return;}
-if(!data||!data.length){box.innerHTML=`<p style="color:#f3d9b9;">No requests yet.</p>`;return;}
-box.innerHTML="";
-data.forEach(r=>{
-const div=document.createElement("div");
-div.className="request";
-div.innerHTML=`
-<strong style="color:#ffd38a;">${r.request_type || "Request"}</strong>
-<p><b>Gallery:</b> ${r.client_galleries?.client_name || ""} — ${r.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${r.client_name || ""} ${r.client_email ? "— "+r.client_email : ""}</p>
-<p><b>Message:</b> ${r.message || ""}</p>
-${r.gallery_photos?.image_url ? `<img src="${r.gallery_photos.image_url}" style="width:120px;height:120px;object-fit:cover;border-radius:14px;margin-top:10px;">` : ""}
+await supabaseClient
+.from("client_galleries")
+.delete()
+.eq("id", galleryId);
+
+await refreshAll();
+}
+
+async function loadFavorites(){
+const box = document.getElementById("favoritesList");
+box.innerHTML = `<p style="color:#f3d9b9;">Loading favorites...</p>`;
+
+const { data, error } = await supabaseClient
+.from("client_favorites")
+.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
+.order("created_at", { ascending:false });
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+document.getElementById("statFavorites").textContent = (data || []).length;
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No favorites yet.</p>`;
+return;
+}
+
+box.innerHTML = "";
+
+data.forEach(f => {
+const div = document.createElement("div");
+div.className = "request";
+div.innerHTML = `
+<strong style="color:#ffd38a;">Favorite Selected</strong>
+<p><b>Gallery:</b> ${f.client_galleries?.client_name || ""} — ${f.client_galleries?.gallery_code || ""}</p>
+<p><b>Client:</b> ${f.client_name || ""} ${f.client_email ? "— " + f.client_email : ""}</p>
+<p><b>Photo:</b> ${f.gallery_photos?.caption || "Photo"}</p>
+${f.gallery_photos?.image_url ? `<img src="${f.gallery_photos.image_url}">` : ""}
 `;
 box.appendChild(div);
 });
 }
 
-document.addEventListener("keydown",e=>{
-const viewer=document.getElementById("photoViewer");
-if(viewer.style.display!=="flex")return;
-if(e.key==="ArrowRight")nextPhoto();
-if(e.key==="ArrowLeft")prevPhoto();
-if(e.key==="Escape")closePhotoViewer();
+async function loadRequests(){
+const box = document.getElementById("requestsList");
+box.innerHTML = `<p style="color:#f3d9b9;">Loading requests...</p>`;
+
+const { data,error } = await supabaseClient
+.from("gallery_requests")
+.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
+.order("created_at", { ascending:false });
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+document.getElementById("statRequests").textContent = (data || []).length;
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No requests yet.</p>`;
+return;
+}
+
+box.innerHTML = "";
+
+data.forEach(r => {
+const div = document.createElement("div");
+div.className = "request";
+
+div.innerHTML = `
+<strong style="color:#ffd38a;">${r.request_type || "Request"}</strong>
+<p><b>Gallery:</b> ${r.client_galleries?.client_name || ""} — ${r.client_galleries?.gallery_code || ""}</p>
+<p><b>Client:</b> ${r.client_name || ""} ${r.client_email ? "— " + r.client_email : ""}</p>
+<p><b>Message:</b> ${r.message || ""}</p>
+${r.gallery_photos?.image_url ? `<img src="${r.gallery_photos.image_url}">` : ""}
+`;
+
+box.appendChild(div);
+});
+}
+
+async function loadOrders(){
+const box = document.getElementById("ordersList");
+box.innerHTML = `<p style="color:#f3d9b9;">Loading orders...</p>`;
+
+const { data,error } = await supabaseClient
+.from("photo_orders")
+.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
+.order("created_at", { ascending:false });
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+document.getElementById("statOrders").textContent = (data || []).length;
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No PayPal orders yet.</p>`;
+return;
+}
+
+box.innerHTML = "";
+
+data.forEach(o => {
+const div = document.createElement("div");
+div.className = "request";
+
+div.innerHTML = `
+<strong style="color:#ffd38a;">PayPal Order — $${Number(o.amount || 0).toFixed(2)}</strong>
+<p><b>Status:</b> ${o.paypal_status || ""}</p>
+<p><b>PayPal Order ID:</b> ${o.paypal_order_id || ""}</p>
+<p><b>Gallery:</b> ${o.client_galleries?.client_name || ""} — ${o.client_galleries?.gallery_code || ""}</p>
+<p><b>Client:</b> ${o.client_name || ""} ${o.client_email ? "— " + o.client_email : ""}</p>
+<p><b>Photo:</b> ${o.gallery_photos?.caption || "Photo"}</p>
+${o.gallery_photos?.image_url ? `<img src="${o.gallery_photos.image_url}">` : ""}
+`;
+
+box.appendChild(div);
+});
+}
+
+document.addEventListener("keydown", e => {
+const viewer = document.getElementById("photoViewer");
+
+if(viewer.style.display !== "flex") return;
+
+if(e.key === "ArrowRight") nextPhoto();
+if(e.key === "ArrowLeft") prevPhoto();
+if(e.key === "Escape") closePhotoViewer();
 });
 
-document.getElementById("viewerBox").addEventListener("touchstart",e=>{touchStartX=e.changedTouches[0].screenX;});
-document.getElementById("viewerBox").addEventListener("touchend",e=>{touchEndX=e.changedTouches[0].screenX;handleSwipe();});
-function handleSwipe(){const diff=touchStartX-touchEndX;if(Math.abs(diff)<50)return;if(diff>0)nextPhoto();else prevPhoto();}
+document.getElementById("viewerBox").addEventListener("touchstart", e => {
+touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById("viewerBox").addEventListener("touchend", e => {
+touchEndX = e.changedTouches[0].screenX;
+handleSwipe();
+});
+
+function handleSwipe(){
+const diff = touchStartX - touchEndX;
+if(Math.abs(diff) < 50) return;
+if(diff > 0) nextPhoto();
+else prevPhoto();
+}
 </script>
 
 </body>
