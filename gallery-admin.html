@@ -10,7 +10,6 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
 body{
 font-family:Inter,sans-serif;
 background:#0c0502;
@@ -21,7 +20,6 @@ radial-gradient(circle at top left,rgba(255,179,71,.18),transparent 35%),
 radial-gradient(circle at top right,rgba(255,211,138,.14),transparent 32%),
 linear-gradient(135deg,#160904,#050201);
 }
-
 header{
 padding:18px 6%;
 display:flex;
@@ -34,36 +32,30 @@ position:sticky;
 top:0;
 z-index:50;
 }
-
 .logo{
 font-family:'Playfair Display',serif;
 font-size:24px;
 color:#ffd38a;
 }
-
 .container{
 padding:45px 6%;
 max-width:1400px;
 margin:auto;
 }
-
 h1,h2{
 font-family:'Playfair Display',serif;
 color:#ffd38a;
 }
-
 h1{
 font-size:clamp(40px,6vw,72px);
 line-height:1;
 margin-bottom:10px;
 }
-
 .sub{
 color:#f3d9b9;
 line-height:1.7;
 margin-bottom:28px;
 }
-
 .panel{
 background:rgba(255,255,255,.07);
 border:1px solid rgba(255,211,138,.18);
@@ -73,13 +65,11 @@ box-shadow:0 25px 70px rgba(0,0,0,.28);
 backdrop-filter:blur(18px);
 margin-bottom:22px;
 }
-
 .grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:16px;
 }
-
 input,textarea,select{
 width:100%;
 padding:14px 15px;
@@ -90,12 +80,10 @@ background:rgba(255,255,255,.94);
 font-family:Inter,sans-serif;
 font-size:15px;
 }
-
 textarea{
 min-height:100px;
 resize:vertical;
 }
-
 label{
 display:block;
 font-size:14px;
@@ -103,11 +91,9 @@ font-weight:800;
 color:#ffd38a;
 margin-bottom:7px;
 }
-
 .field{
 margin-bottom:15px;
 }
-
 button{
 border:none;
 cursor:pointer;
@@ -118,82 +104,69 @@ background:linear-gradient(135deg,#ffd38a,#c77b28);
 color:#1b0e04;
 box-shadow:0 14px 34px rgba(199,123,40,.28);
 }
-
 .secondary{
 background:rgba(255,255,255,.1);
 color:white;
 border:1px solid rgba(255,255,255,.18);
 box-shadow:none;
 }
-
 .danger{
 background:#932222;
 color:white;
 box-shadow:none;
 }
-
 .admin{
 display:none;
 }
-
 .message{
 margin-top:12px;
 color:#ffd38a;
 font-weight:800;
 }
-
 .stats{
 display:grid;
 grid-template-columns:repeat(4,1fr);
 gap:14px;
 margin-bottom:22px;
 }
-
 .stat{
 background:rgba(255,255,255,.07);
 border:1px solid rgba(255,211,138,.16);
 border-radius:20px;
 padding:18px;
 }
-
 .stat strong{
 display:block;
 font-size:30px;
 color:#ffd38a;
 }
-
 .stat span{
 font-size:13px;
 color:#f3d9b9;
 font-weight:800;
 }
-
 .gallery-list{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:16px;
 }
-
 .gallery-card{
 background:rgba(255,255,255,.06);
 border:1px solid rgba(255,211,138,.16);
 border-radius:22px;
 padding:20px;
 }
-
 .gallery-card h3{
 font-family:'Playfair Display',serif;
 font-size:25px;
 color:#ffd38a;
 margin-bottom:6px;
 }
-
 .gallery-card p{
 color:#f3d9b9;
 font-size:14px;
 line-height:1.6;
 }
-
 .code{
 display:inline-block;
 margin:10px 0;
@@ -204,21 +177,18 @@ color:#ffd38a;
 font-weight:900;
 font-size:13px;
 }
-
 .actions{
 display:flex;
 gap:9px;
 flex-wrap:wrap;
 margin-top:12px;
 }
-
 .photos{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(130px,160px));
 gap:11px;
 margin-top:16px;
 }
-
 .photo{
 width:160px;
 aspect-ratio:1/1;
@@ -228,7 +198,6 @@ position:relative;
 background:rgba(255,255,255,.08);
 border:1px solid rgba(255,255,255,.12);
 }
-
 .photo img{
 width:100%;
 height:100%;
@@ -236,7 +205,6 @@ object-fit:cover;
 display:block;
 cursor:pointer;
 }
-
 .badge{
 position:absolute;
 top:8px;
@@ -248,7 +216,6 @@ font-weight:900;
 padding:5px 8px;
 border-radius:999px;
 }
-
 .photo button{
 position:absolute;
 bottom:0;
@@ -260,31 +227,26 @@ font-size:12px;
 background:rgba(147,34,34,.95);
 color:white;
 }
-
 .list{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:14px;
 }
-
 .item{
 background:rgba(255,255,255,.06);
 border:1px solid rgba(255,211,138,.14);
 border-radius:18px;
 padding:16px;
 }
-
 .item strong{
 color:#ffd38a;
 }
-
 .item p{
 color:#f3d9b9;
 font-size:14px;
 line-height:1.5;
 margin-top:5px;
 }
-
 .item img{
 width:120px;
 height:120px;
@@ -292,7 +254,6 @@ object-fit:cover;
 border-radius:14px;
 margin-top:10px;
 }
-
 .viewer{
 position:fixed;
 inset:0;
@@ -303,26 +264,22 @@ justify-content:center;
 z-index:9999;
 padding:25px;
 }
-
 .viewer-box{
 max-width:92%;
 text-align:center;
 }
-
 .viewer-box img{
 max-width:100%;
-max-height:72vh;
+max-height:62vh;
 object-fit:contain;
 border-radius:20px;
 box-shadow:0 30px 80px rgba(0,0,0,.6);
 }
-
 .viewer-box p{
 color:#ffd38a;
 font-weight:900;
 margin-top:12px;
 }
-
 .close{
 position:absolute;
 top:20px;
@@ -331,772 +288,6 @@ font-size:44px;
 color:white;
 cursor:pointer;
 }
-
 .arrow{
 position:absolute;
 top:50%;
-transform:translateY(-50%);
-width:54px;
-height:54px;
-border-radius:50%;
-font-size:40px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:rgba(255,211,138,.18);
-color:#ffd38a;
-border:1px solid rgba(255,211,138,.3);
-box-shadow:none;
-}
-
-.arrow.left{left:18px}
-.arrow.right{right:18px}
-
-.viewer-actions{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-justify-content:center;
-margin-top:14px;
-}
-
-@media(max-width:1000px){
-.stats{grid-template-columns:repeat(2,1fr)}
-.grid,.gallery-list,.list{grid-template-columns:1fr}
-}
-
-@media(max-width:600px){
-.container{padding:35px 5%}
-header{padding:16px 5%}
-.logo{font-size:20px}
-.stats{grid-template-columns:1fr}
-.photo{width:135px}
-.photos{grid-template-columns:repeat(auto-fill,minmax(125px,135px))}
-.arrow{width:44px;height:44px;font-size:32px}
-.arrow.left{left:8px}
-.arrow.right{right:8px}
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<div class="logo">Sunset Trails Admin</div>
-<button class="secondary" onclick="logout()">Logout</button>
-</header>
-
-<div class="container">
-
-<section id="loginPanel" class="panel">
-<h1>Gallery Admin</h1>
-<p class="sub">Manage client galleries, proof photos, favorites, print requests, and PayPal orders.</p>
-
-<div class="field">
-<label>Email</label>
-<input id="email" type="email" placeholder="admin@email.com">
-</div>
-
-<div class="field">
-<label>Password</label>
-<input id="password" type="password" placeholder="Password">
-</div>
-
-<button onclick="login()">Login</button>
-<div class="message" id="loginMessage"></div>
-</section>
-
-<section id="adminPanel" class="admin">
-
-<h1>Admin Console</h1>
-<p class="sub">Upload photos, approve finals, control watermarks, set prices, and see what clients selected.</p>
-
-<div class="stats">
-<div class="stat"><strong id="statGalleries">0</strong><span>Galleries</span></div>
-<div class="stat"><strong id="statFavorites">0</strong><span>Favorites</span></div>
-<div class="stat"><strong id="statRequests">0</strong><span>Requests</span></div>
-<div class="stat"><strong id="statOrders">0</strong><span>Orders</span></div>
-</div>
-
-<div class="panel">
-<h2>Create New Gallery</h2><br>
-
-<div class="grid">
-<div class="field">
-<label>Client Name</label>
-<input id="clientName" placeholder="Jones Family">
-</div>
-
-<div class="field">
-<label>Gallery Code</label>
-<input id="galleryCode" placeholder="SUNSET-JONES-2026">
-</div>
-</div>
-
-<div class="grid">
-<div class="field">
-<label>Package Name</label>
-<input id="packageName" placeholder="Family Session / Wedding / Senior Photos">
-</div>
-
-<div class="field">
-<label>Optional Payment Link</label>
-<input id="paymentLink" placeholder="Leave blank if using PayPal checkout">
-</div>
-</div>
-
-<div class="field">
-<label>Gallery Notes</label>
-<textarea id="notes" placeholder="Your proof gallery is ready. Watermarked photos are previews. Approved finals can be downloaded."></textarea>
-</div>
-
-<button onclick="createGallery()">Create Gallery</button>
-<div class="message" id="createMessage"></div>
-</div>
-
-<div class="panel">
-<h2>Upload Photos</h2><br>
-
-<div class="field">
-<label>Select Gallery</label>
-<select id="gallerySelect"></select>
-</div>
-
-<div class="field">
-<label>Choose Photos</label>
-<input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" multiple>
-</div>
-
-<div class="grid">
-<div class="field">
-<label>Caption</label>
-<input id="caption" placeholder="Sunset Trails Photography">
-</div>
-
-<div class="field">
-<label>Price for Purchase</label>
-<input id="photoPrice" type="number" step="0.01" placeholder="25.00">
-</div>
-</div>
-
-<div class="grid">
-<div class="field">
-<label>Upload As</label>
-<select id="approvedUpload">
-<option value="false">Proof / Watermarked</option>
-<option value="true">Approved Final / Downloadable</option>
-</select>
-</div>
-
-<div class="field">
-<label>Watermark</label>
-<select id="watermarkUpload">
-<option value="true">Watermark On</option>
-<option value="false">Watermark Off</option>
-</select>
-</div>
-</div>
-
-<button onclick="uploadPhotos()">Upload Photos</button>
-<div class="message" id="uploadMessage"></div>
-</div>
-
-<div class="panel">
-<h2>Existing Galleries</h2><br>
-<div class="gallery-list" id="galleryList"></div>
-</div>
-
-<div class="panel">
-<h2>Favorites</h2><br>
-<button onclick="loadFavorites()">Refresh Favorites</button>
-<br><br>
-<div class="list" id="favoritesList"></div>
-</div>
-
-<div class="panel">
-<h2>Requests</h2><br>
-<button onclick="loadRequests()">Refresh Requests</button>
-<br><br>
-<div class="list" id="requestsList"></div>
-</div>
-
-<div class="panel">
-<h2>PayPal Orders</h2><br>
-<button onclick="loadOrders()">Refresh Orders</button>
-<br><br>
-<div class="list" id="ordersList"></div>
-</div>
-
-</section>
-
-</div>
-
-<div class="viewer" id="viewer">
-<span class="close" onclick="closeViewer()">×</span>
-<button class="arrow left" onclick="prevPhoto()">‹</button>
-
-<div class="viewer-box">
-<img id="viewerImg">
-<p id="viewerInfo"></p>
-
-<div class="viewer-actions">
-<button onclick="toggleApproved()">Toggle Approved</button>
-<button onclick="toggleWatermark()">Toggle Watermark</button>
-<button class="danger" onclick="deleteCurrentPhoto()">Delete Photo</button>
-</div>
-</div>
-
-<button class="arrow right" onclick="nextPhoto()">›</button>
-</div>
-
-<script>
-const supabaseClient = supabase.createClient("https://mcjqykkjyvhcqlfjwzpo.supabase.co","sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8");
-
-let allGalleries = [];
-let currentPhotos = [];
-let currentPhotoIndex = 0;
-let currentGalleryId = null;
-
-window.addEventListener("load", async () => {
-const { data } = await supabaseClient.auth.getSession();
-if(data.session) showAdmin();
-});
-
-async function login(){
-const email = document.getElementById("email").value.trim();
-const password = document.getElementById("password").value.trim();
-const msg = document.getElementById("loginMessage");
-
-msg.textContent = "";
-
-if(!email || !password){
-msg.textContent = "Enter email and password.";
-return;
-}
-
-const { error } = await supabaseClient.auth.signInWithPassword({email,password});
-
-if(error){
-msg.textContent = error.message;
-return;
-}
-
-showAdmin();
-}
-
-async function logout(){
-await supabaseClient.auth.signOut();
-location.reload();
-}
-
-async function showAdmin(){
-document.getElementById("loginPanel").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
-await refreshAll();
-}
-
-async function refreshAll(){
-await loadGalleries();
-await loadFavorites();
-await loadRequests();
-await loadOrders();
-}
-
-function makeCode(name){
-return "SUNSET-" + name.trim().replace(/[^a-z0-9]/gi,"-").replace(/-+/g,"-").toUpperCase() + "-" + new Date().getFullYear();
-}
-
-document.getElementById("clientName").addEventListener("input", () => {
-const codeInput = document.getElementById("galleryCode");
-if(!codeInput.value.trim()){
-codeInput.value = makeCode(document.getElementById("clientName").value);
-}
-});
-
-async function createGallery(){
-const client_name = document.getElementById("clientName").value.trim();
-const gallery_code = document.getElementById("galleryCode").value.trim().toUpperCase();
-const package_name = document.getElementById("packageName").value.trim();
-const payment_link = document.getElementById("paymentLink").value.trim();
-const notes = document.getElementById("notes").value.trim();
-const msg = document.getElementById("createMessage");
-
-msg.textContent = "";
-
-if(!client_name || !gallery_code){
-msg.textContent = "Client name and gallery code are required.";
-return;
-}
-
-const { error } = await supabaseClient
-.from("client_galleries")
-.insert([{client_name,gallery_code,package_name,payment_link,notes}]);
-
-if(error){
-msg.textContent = error.message;
-return;
-}
-
-msg.textContent = "Gallery created.";
-
-document.getElementById("clientName").value = "";
-document.getElementById("galleryCode").value = "";
-document.getElementById("packageName").value = "";
-document.getElementById("paymentLink").value = "";
-document.getElementById("notes").value = "";
-
-await loadGalleries();
-}
-
-async function loadGalleries(){
-const { data, error } = await supabaseClient
-.from("client_galleries")
-.select("*")
-.order("created_at",{ascending:false});
-
-if(error) return;
-
-allGalleries = data || [];
-
-document.getElementById("statGalleries").textContent = allGalleries.length;
-
-const select = document.getElementById("gallerySelect");
-const list = document.getElementById("galleryList");
-
-select.innerHTML = "";
-list.innerHTML = "";
-
-if(!allGalleries.length){
-list.innerHTML = `<p style="color:#f3d9b9;">No galleries yet.</p>`;
-return;
-}
-
-allGalleries.forEach(gallery => {
-const opt = document.createElement("option");
-opt.value = gallery.id;
-opt.textContent = gallery.client_name + " — " + gallery.gallery_code;
-select.appendChild(opt);
-
-const card = document.createElement("div");
-card.className = "gallery-card";
-
-card.innerHTML = `
-<h3>${gallery.client_name}</h3>
-<p>${gallery.package_name || "No package listed"}</p>
-<span class="code">${gallery.gallery_code}</span>
-<p>${gallery.notes || ""}</p>
-
-<div class="actions">
-<button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
-<button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
-<button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
-</div>
-
-<div class="photos" id="photos-${gallery.id}" data-open="false"></div>
-`;
-
-list.appendChild(card);
-});
-}
-
-function copyCode(code){
-navigator.clipboard.writeText(code);
-alert("Copied: " + code);
-}
-
-async function uploadPhotos(){
-const galleryId = document.getElementById("gallerySelect").value;
-const files = Array.from(document.getElementById("photoFiles").files || []);
-const caption = document.getElementById("caption").value.trim();
-const price = parseFloat(document.getElementById("photoPrice").value || "0");
-const isApproved = document.getElementById("approvedUpload").value === "true";
-const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
-const msg = document.getElementById("uploadMessage");
-
-msg.textContent = "";
-
-if(!galleryId){
-msg.textContent = "Choose a gallery first.";
-return;
-}
-
-if(!files.length){
-msg.textContent = "Choose at least one photo.";
-return;
-}
-
-msg.textContent = "Uploading...";
-
-for(const file of files){
-if(!file || file.size === 0){
-msg.textContent = "One file is empty. Try a normal JPG or PNG.";
-return;
-}
-
-const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-const filePath = `${galleryId}/${crypto.randomUUID()}.${ext}`;
-const bytes = new Uint8Array(await file.arrayBuffer());
-
-const { error: uploadError } = await supabaseClient.storage
-.from("gallery-photos")
-.upload(filePath, bytes, {
-contentType:file.type || "image/jpeg",
-cacheControl:"3600",
-upsert:false
-});
-
-if(uploadError){
-msg.textContent = uploadError.message;
-return;
-}
-
-const { data: publicData } = supabaseClient.storage
-.from("gallery-photos")
-.getPublicUrl(filePath);
-
-const { error: dbError } = await supabaseClient
-.from("gallery_photos")
-.insert([{
-gallery_id:galleryId,
-image_url:publicData.publicUrl,
-file_path:filePath,
-caption:caption || "Sunset Trails Photography",
-is_approved:isApproved,
-watermark_enabled:watermarkEnabled,
-price:price || 0
-}]);
-
-if(dbError){
-msg.textContent = dbError.message;
-return;
-}
-}
-
-document.getElementById("photoFiles").value = "";
-document.getElementById("caption").value = "";
-document.getElementById("photoPrice").value = "";
-
-msg.textContent = "Uploaded successfully.";
-
-const box = document.getElementById("photos-" + galleryId);
-if(box){
-box.dataset.open = "false";
-box.innerHTML = "";
-}
-
-await viewPhotos(galleryId);
-}
-
-async function viewPhotos(galleryId){
-currentGalleryId = galleryId;
-
-const box = document.getElementById("photos-" + galleryId);
-
-if(box.dataset.open === "true"){
-box.innerHTML = "";
-box.dataset.open = "false";
-return;
-}
-
-box.innerHTML = `<p style="color:#f3d9b9;">Loading photos...</p>`;
-
-const { data, error } = await supabaseClient
-.from("gallery_photos")
-.select("*")
-.eq("gallery_id",galleryId)
-.order("created_at",{ascending:true});
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
-return;
-}
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No photos uploaded yet.</p>`;
-box.dataset.open = "true";
-return;
-}
-
-currentPhotos = data;
-
-box.innerHTML = "";
-box.dataset.open = "true";
-
-data.forEach((photo,index) => {
-const div = document.createElement("div");
-div.className = "photo";
-
-div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} • $${Number(photo.price || 0).toFixed(2)}</span>
-<img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index})">
-<button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
-`;
-
-box.appendChild(div);
-});
-}
-
-async function openViewer(galleryId,index){
-currentGalleryId = galleryId;
-
-const { data } = await supabaseClient
-.from("gallery_photos")
-.select("*")
-.eq("gallery_id",galleryId)
-.order("created_at",{ascending:true});
-
-currentPhotos = data || [];
-currentPhotoIndex = index;
-renderViewer();
-}
-
-function renderViewer(){
-if(!currentPhotos.length) return;
-
-const p = currentPhotos[currentPhotoIndex];
-
-document.getElementById("viewerImg").src = p.image_url;
-document.getElementById("viewerInfo").textContent =
-`${currentPhotoIndex + 1} / ${currentPhotos.length} — ${p.is_approved ? "Approved Final" : "Proof"} — Watermark: ${p.watermark_enabled ? "On" : "Off"} — $${Number(p.price || 0).toFixed(2)}`;
-
-document.getElementById("viewer").style.display = "flex";
-}
-
-function closeViewer(){
-document.getElementById("viewer").style.display = "none";
-}
-
-function nextPhoto(){
-currentPhotoIndex++;
-if(currentPhotoIndex >= currentPhotos.length) currentPhotoIndex = 0;
-renderViewer();
-}
-
-function prevPhoto(){
-currentPhotoIndex--;
-if(currentPhotoIndex < 0) currentPhotoIndex = currentPhotos.length - 1;
-renderViewer();
-}
-
-async function toggleApproved(){
-const p = currentPhotos[currentPhotoIndex];
-const newValue = !p.is_approved;
-
-await supabaseClient
-.from("gallery_photos")
-.update({is_approved:newValue})
-.eq("id",p.id);
-
-currentPhotos[currentPhotoIndex].is_approved = newValue;
-renderViewer();
-
-const box = document.getElementById("photos-" + currentGalleryId);
-if(box){
-box.dataset.open = "false";
-box.innerHTML = "";
-viewPhotos(currentGalleryId);
-}
-}
-
-async function toggleWatermark(){
-const p = currentPhotos[currentPhotoIndex];
-const newValue = !p.watermark_enabled;
-
-await supabaseClient
-.from("gallery_photos")
-.update({watermark_enabled:newValue})
-.eq("id",p.id);
-
-currentPhotos[currentPhotoIndex].watermark_enabled = newValue;
-renderViewer();
-}
-
-async function deleteCurrentPhoto(){
-const p = currentPhotos[currentPhotoIndex];
-if(!confirm("Delete this photo?")) return;
-
-await supabaseClient.storage.from("gallery-photos").remove([p.file_path]);
-await supabaseClient.from("gallery_photos").delete().eq("id",p.id);
-
-currentPhotos.splice(currentPhotoIndex,1);
-
-if(!currentPhotos.length){
-closeViewer();
-return;
-}
-
-if(currentPhotoIndex >= currentPhotos.length){
-currentPhotoIndex = currentPhotos.length - 1;
-}
-
-renderViewer();
-
-const box = document.getElementById("photos-" + currentGalleryId);
-if(box){
-box.dataset.open = "false";
-box.innerHTML = "";
-viewPhotos(currentGalleryId);
-}
-}
-
-async function deletePhotoFromGrid(photoId,filePath,galleryId){
-if(!confirm("Delete this photo?")) return;
-
-await supabaseClient.storage.from("gallery-photos").remove([filePath]);
-await supabaseClient.from("gallery_photos").delete().eq("id",photoId);
-
-const box = document.getElementById("photos-" + galleryId);
-if(box){
-box.dataset.open = "false";
-box.innerHTML = "";
-}
-
-await viewPhotos(galleryId);
-}
-
-async function deleteGallery(galleryId){
-if(!confirm("Delete this entire gallery?")) return;
-
-const { data: photos } = await supabaseClient
-.from("gallery_photos")
-.select("file_path")
-.eq("gallery_id",galleryId);
-
-if(photos && photos.length){
-await supabaseClient.storage.from("gallery-photos").remove(photos.map(p => p.file_path));
-}
-
-await supabaseClient.from("client_galleries").delete().eq("id",galleryId);
-await refreshAll();
-}
-
-async function loadFavorites(){
-const box = document.getElementById("favoritesList");
-box.innerHTML = `<p style="color:#f3d9b9;">Loading favorites...</p>`;
-
-const { data, error } = await supabaseClient
-.from("client_favorites")
-.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false});
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
-return;
-}
-
-document.getElementById("statFavorites").textContent = (data || []).length;
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No favorites yet.</p>`;
-return;
-}
-
-box.innerHTML = "";
-
-data.forEach(f => {
-const div = document.createElement("div");
-div.className = "item";
-
-div.innerHTML = `
-<strong>Favorite Selected</strong>
-<p><b>Gallery:</b> ${f.client_galleries?.client_name || ""} — ${f.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${f.client_name || ""} ${f.client_email ? "— " + f.client_email : ""}</p>
-<p><b>Photo:</b> ${f.gallery_photos?.caption || "Photo"}</p>
-${f.gallery_photos?.image_url ? `<img src="${f.gallery_photos.image_url}">` : ""}
-`;
-
-box.appendChild(div);
-});
-}
-
-async function loadRequests(){
-const box = document.getElementById("requestsList");
-box.innerHTML = `<p style="color:#f3d9b9;">Loading requests...</p>`;
-
-const { data, error } = await supabaseClient
-.from("gallery_requests")
-.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false});
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
-return;
-}
-
-document.getElementById("statRequests").textContent = (data || []).length;
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No requests yet.</p>`;
-return;
-}
-
-box.innerHTML = "";
-
-data.forEach(r => {
-const div = document.createElement("div");
-div.className = "item";
-
-div.innerHTML = `
-<strong>${r.request_type || "Request"}</strong>
-<p><b>Gallery:</b> ${r.client_galleries?.client_name || ""} — ${r.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${r.client_name || ""} ${r.client_email ? "— " + r.client_email : ""}</p>
-<p><b>Message:</b> ${r.message || ""}</p>
-${r.gallery_photos?.image_url ? `<img src="${r.gallery_photos.image_url}">` : ""}
-`;
-
-box.appendChild(div);
-});
-}
-
-async function loadOrders(){
-const box = document.getElementById("ordersList");
-box.innerHTML = `<p style="color:#f3d9b9;">Loading orders...</p>`;
-
-const { data, error } = await supabaseClient
-.from("photo_orders")
-.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false});
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
-return;
-}
-
-document.getElementById("statOrders").textContent = (data || []).length;
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No orders yet.</p>`;
-return;
-}
-
-box.innerHTML = "";
-
-data.forEach(o => {
-const div = document.createElement("div");
-div.className = "item";
-
-div.innerHTML = `
-<strong>PayPal Order — $${Number(o.amount || 0).toFixed(2)}</strong>
-<p><b>Status:</b> ${o.paypal_status || ""}</p>
-<p><b>Order ID:</b> ${o.paypal_order_id || ""}</p>
-<p><b>Gallery:</b> ${o.client_galleries?.client_name || ""} — ${o.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${o.client_name || ""} ${o.client_email ? "— " + o.client_email : ""}</p>
-<p><b>Photo:</b> ${o.gallery_photos?.caption || "Photo"}</p>
-${o.gallery_photos?.image_url ? `<img src="${o.gallery_photos.image_url}">` : ""}
-`;
-
-box.appendChild(div);
-});
-}
-
-document.addEventListener("keydown", e => {
-if(document.getElementById("viewer").style.display !== "flex") return;
-
-if(e.key === "ArrowRight") nextPhoto();
-if(e.key === "ArrowLeft") prevPhoto();
-if(e.key === "Escape") closeViewer();
-});
-</script>
-
-</body>
-</html>
