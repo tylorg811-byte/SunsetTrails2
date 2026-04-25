@@ -88,15 +88,14 @@ a{text-decoration:none;color:inherit}
   align-items:center;
   padding:140px 7% 80px;
   background:
-    linear-gradient(90deg,rgba(10,6,3,.92),rgba(10,6,3,.58),rgba(10,6,3,.25)),
-    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90") center/cover;
+    linear-gradient(90deg,rgba(10,6,3,.85),rgba(10,6,3,.55),rgba(10,6,3,.2)),
+    url("images/sunset-bg.jpg") center/cover no-repeat;
 }
 .hero::after{
   content:"";
   position:absolute;
   inset:0;
-  background:radial-gradient(circle at 70% 55%,rgba(255,166,73,.25),transparent 35%);
-  pointer-events:none;
+  background:radial-gradient(circle at 70% 55%,rgba(255,170,80,.35),transparent 45%);
 }
 .hero-content{
   position:relative;
@@ -365,10 +364,10 @@ button{border:0;cursor:pointer;font-size:15px}
   }
   .nav.active{display:flex}
   .hero{
-    background:
-      linear-gradient(180deg,rgba(10,6,3,.8),rgba(10,6,3,.92)),
-      url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=90") center/cover;
-  }
+  background:
+    linear-gradient(180deg,rgba(10,6,3,.75),rgba(10,6,3,.92)),
+    url("images/sunset-bg.jpg") center/cover no-repeat;
+}
   .experience,.story,.portfolio,.booking-wrap{
     grid-template-columns:1fr;
   }
