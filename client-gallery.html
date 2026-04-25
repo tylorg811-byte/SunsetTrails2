@@ -199,7 +199,8 @@ currentIndex=index;
 const photo=currentPhotos[currentIndex];
 document.getElementById("lightboxImg").src=photo.image_url;
 document.getElementById("viewerCount").textContent=(currentIndex+1)+" / "+currentPhotos.length+" — "+(photo.is_approved?"Approved Final":"Proof");
-document.getElementById("viewerWatermark").style.display=(photo.watermark_enabled&&!photo.is_approved)?"flex":"none";
+document.getElementById("viewerWatermark").style.display =
+(photo.is_approved !== true && photo.watermark_enabled !== false) ? "flex" : "none";
 document.getElementById("lightbox").style.display="flex";
 }
 
