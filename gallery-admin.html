@@ -524,6 +524,12 @@ header{padding:16px 5%}
 .arrow.right{right:8px}
 .viewer-box img{max-height:45vh}
 }
+
+/* PAID EDITING QUEUE */
+.queue-card{background:rgba(255,211,138,.08);border:1px solid rgba(255,211,138,.18);border-radius:22px;padding:18px;}
+.queue-card h3{font-family:'Playfair Display',serif;color:#ffd38a;font-size:28px;margin-bottom:8px;}
+.queue-meta{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0;}
+.pill{display:inline-flex;padding:7px 11px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,211,138,.2);color:#ffd38a;font-size:12px;font-weight:900;}
 </style>
 </head>
 
@@ -597,6 +603,11 @@ header{padding:16px 5%}
 <div class="field">
 <label>Full Gallery Price</label>
 <input id="fullGalleryPrice" type="number" step="0.01" placeholder="150.00">
+</div>
+
+<div class="field">
+<label>Edit Price Per Selected Photo</label>
+<input id="editPricePerPhoto" type="number" step="0.01" placeholder="10.00">
 </div>
 
 <div class="field">
@@ -743,6 +754,13 @@ header{padding:16px 5%}
 </div>
 
 <div class="panel">
+<h2>Paid Editing Queue</h2><br>
+<button onclick="loadEditingQueue()">Refresh Editing Queue</button>
+<br><br>
+<div class="list" id="editingQueueList"></div>
+</div>
+
+<div class="panel">
 <h2>Requests</h2><br>
 <button onclick="loadRequests()">Refresh Requests</button>
 <button class="danger" onclick="clearAllRequests()">Clear All Requests</button>
@@ -874,6 +892,7 @@ await refreshAll();
 async function refreshAll(){
 await loadGalleries();
 await loadFavorites();
+await loadEditingQueue();
 await loadRequests();
 await loadOrders();
 }
@@ -895,6 +914,7 @@ const gallery_code = document.getElementById("galleryCode").value.trim().toUpper
 const package_name = document.getElementById("packageName").value.trim();
 const payment_link = document.getElementById("paymentLink").value.trim();
 const full_gallery_price = parseFloat(document.getElementById("fullGalleryPrice").value || "0");
+const edit_price_per_photo = parseFloat(document.getElementById("editPricePerPhoto")?.value || "10");
 const is_active = document.getElementById("galleryActive").value === "true";
 const notes = document.getElementById("notes").value.trim();
 const msg = document.getElementById("createMessage");
@@ -914,6 +934,7 @@ gallery_code,
 package_name,
 payment_link,
 full_gallery_price: full_gallery_price || 0,
+edit_price_per_photo: edit_price_per_photo || 10,
 is_active,
 notes
 }]);
@@ -930,6 +951,7 @@ document.getElementById("galleryCode").value = "";
 document.getElementById("packageName").value = "";
 document.getElementById("paymentLink").value = "";
 document.getElementById("fullGalleryPrice").value = "";
+document.getElementById("editPricePerPhoto").value = "";
 document.getElementById("galleryActive").value = "true";
 document.getElementById("notes").value = "";
 
@@ -974,6 +996,7 @@ card.innerHTML = `
 <span class="code">${gallery.gallery_code}</span>
 <p>${gallery.notes || ""}</p>
 <p><b>Full Gallery:</b> $${Number(gallery.full_gallery_price || 0).toFixed(2)}</p>
+<p><b>Edit Price:</b> $${Number(gallery.edit_price_per_photo || 10).toFixed(2)} per selected photo</p>
 <p><b>Status:</b> ${gallery.is_active === false ? "Inactive / Hidden" : "Active / Client Can View"}</p>
 
 <div class="actions">
@@ -1811,6 +1834,94 @@ await supabaseClient
 .neq("id", "00000000-0000-0000-0000-000000000000");
 
 await loadFavorites();
+}
+
+async function loadEditingQueue(){
+const box = document.getElementById("editingQueueList");
+if(!box) return;
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading paid editing orders...</p>`;
+
+const { data, error } = await supabaseClient
+.from("paid_edit_orders")
+.select("*, client_galleries(client_name,gallery_code)")
+.order("created_at",{ascending:false});
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No paid editing orders yet.</p>`;
+return;
+}
+
+const allIds = [...new Set(data.flatMap(order => order.selected_photo_ids || []))];
+let photoMap = {};
+
+if(allIds.length){
+const { data: photos } = await supabaseClient
+.from("gallery_photos")
+.select("id,image_url,caption")
+.in("id", allIds);
+
+(photos || []).forEach(photo => photoMap[photo.id] = photo);
+}
+
+box.innerHTML = "";
+
+data.forEach(order => {
+const div = document.createElement("div");
+div.className = "queue-card";
+
+const selectedIds = order.selected_photo_ids || [];
+const thumbs = selectedIds.slice(0,12).map(id => {
+const photo = photoMap[id];
+return photo?.image_url ? `<img src="${photo.image_url}" title="${photo.caption || 'Selected photo'}">` : "";
+}).join("");
+
+const statusLabel = String(order.editing_status || "paid_ready_for_editing").replaceAll("_"," ");
+
+div.innerHTML = `
+<h3>${order.client_name || "Client"}</h3>
+<p><b>Gallery:</b> ${order.client_galleries?.client_name || ""} — ${order.client_galleries?.gallery_code || ""}</p>
+<p><b>Email:</b> ${order.client_email || ""}</p>
+<div class="queue-meta">
+<span class="pill">${Number(order.photo_count || selectedIds.length || 0)} photos</span>
+<span class="pill">$${Number(order.amount || 0).toFixed(2)} paid</span>
+<span class="pill">${statusLabel}</span>
+<span class="pill">PayPal: ${order.paypal_status || ""}</span>
+</div>
+<div class="photos">${thumbs || `<p style="color:#f3d9b9;">No thumbnails found.</p>`}</div>
+<div class="actions">
+<button onclick="updateEditingStatus('${order.id}','editing')">Mark Editing</button>
+<button onclick="updateEditingStatus('${order.id}','completed')">Mark Completed</button>
+<button class="secondary" onclick="copySelectedPhotoIds('${selectedIds.join(",")}' )">Copy Photo IDs</button>
+</div>
+`;
+
+box.appendChild(div);
+});
+}
+
+async function updateEditingStatus(orderId,status){
+const { error } = await supabaseClient
+.from("paid_edit_orders")
+.update({editing_status:status})
+.eq("id",orderId);
+
+if(error){
+alert(error.message);
+return;
+}
+
+await loadEditingQueue();
+}
+
+function copySelectedPhotoIds(ids){
+navigator.clipboard.writeText(ids);
+alert("Selected photo IDs copied.");
 }
 
 async function loadRequests(){
