@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons"></script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -32,7 +31,7 @@ background:
 radial-gradient(circle at 18% 0%,rgba(255,196,101,.25),transparent 28%),
 radial-gradient(circle at 80% 5%,rgba(205,111,30,.2),transparent 32%),
 linear-gradient(rgba(18,11,5,.72),rgba(18,11,5,.96)),
-url('sunset-bg.jpg') center/cover fixed;
+url('images/sunset-bg.jpg') center/cover fixed;
 }
 
 body:before{
@@ -905,6 +904,7 @@ line-height:1!important;
 }
 
 </style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%23100804%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2731%27 fill=%27%23ffd38a%27/%3E%3Cpath d=%27M20 65 Q50 38 80 65%27 stroke=%27%23c77b28%27 stroke-width=%278%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
 </head>
 
 <body>
@@ -1419,7 +1419,7 @@ await trackEvent("favorites_submitted", favoritePhotos.map(p => p.id).join(","))
 alert("Selections submitted successfully. To start editing, use Pay For Selected Edits.");
 }
 
-function payForSelectedEdits(){
+async function payForSelectedEdits(){
 if(!currentGallery || !requireClientInfo()) return;
 
 const selectedPhotos = currentPhotos.filter(photo => favorites.has(photo.id) && photo.photo_stage !== "final");
@@ -1647,7 +1647,7 @@ function renderPayPalButtons(){
 const container = document.getElementById("paypal-button-container");
 container.innerHTML = "";
 
-if(typeof paypal === "undefined" || "YOUR_PAYPAL_CLIENT_ID".includes("YOUR_PAYPAL")){
+if(typeof paypal === "undefined"){
 container.innerHTML = `<p style="color:#111;font-weight:800;text-align:center;">PayPal checkout is not connected yet. Please contact Sunset Trails Photography to complete your purchase.</p>`;
 return;
 }
