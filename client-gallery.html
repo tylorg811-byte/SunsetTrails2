@@ -1354,7 +1354,7 @@ function updateFavoriteCount(){
 const count = favorites.size;
 const total = count * getEditPrice();
 document.getElementById("favoriteCount").textContent =
-count + (count === 1 ? " photo selected for editing" : " photos selected for editing") + " â $" + total.toFixed(2);
+count + (count === 1 ? " photo selected for editing" : " photos selected for editing") + " - $" + total.toFixed(2);
 }
 
 async function submitFavorites(){
@@ -1366,7 +1366,7 @@ return;
 }
 
 const favoritePhotos = currentPhotos.filter(p => favorites.has(p.id));
-const message = favoritePhotos.map((p,i) => `${i+1}. ${p.caption || "Photo"} â ${p.id}`).join("\n");
+const message = favoritePhotos.map((p,i) => `${i+1}. ${p.caption || "Photo"} - ${p.id}`).join("\n");
 
 const { error } = await supabaseClient
 .from("gallery_requests")
@@ -1715,7 +1715,7 @@ const photo = currentPhotos[currentIndex];
 
 document.getElementById("lightboxImg").src = photo.image_url;
 document.getElementById("viewerCount").textContent =
-(currentIndex + 1) + " / " + currentPhotos.length + " â " + (photo.is_approved ? "Approved Final" : "Proof Preview");
+(currentIndex + 1) + " / " + currentPhotos.length + " - " + (photo.is_approved ? "Approved Final" : "Proof Preview");
 
 document.getElementById("viewerWatermark").style.display =
 (photo.is_approved !== true && photo.watermark_enabled !== false) ? "flex" : "none";
@@ -1749,7 +1749,7 @@ document.getElementById("requestMessage").value = "";
 document.getElementById("requestStatus").textContent = "";
 
 document.getElementById("requestPhotoText").textContent =
-`Requesting: ${selectedPhoto.caption || "Photo"}${selectedPhoto.price && selectedPhoto.price > 0 ? " â $" + Number(selectedPhoto.price).toFixed(2) : ""}`;
+`Requesting: ${selectedPhoto.caption || "Photo"}${selectedPhoto.price && selectedPhoto.price > 0 ? " - $" + Number(selectedPhoto.price).toFixed(2) : ""}`;
 
 document.getElementById("requestModal").style.display = "flex";
 }
