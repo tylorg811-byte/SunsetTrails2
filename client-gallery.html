@@ -724,67 +724,6 @@ header{padding:17px 5%}
 .arrow.left{left:8px}
 .arrow.right{right:8px}
 }
-
-  /* FIX: Client gallery photo cards under albums */
-.album-photo-grid,
-#photoGrid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:24px;
-  align-items:start;
-}
-
-.card{
-  width:100%;
-  min-width:0;
-}
-
-.image-wrap{
-  height:360px;
-}
-
-.card-content{
-  padding:22px;
-}
-
-.card-content p{
-  font-size:15px;
-  line-height:1.55;
-  word-break:normal;
-}
-
-.price-line{
-  font-size:16px;
-  line-height:1.4;
-}
-
-.card-actions{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-}
-
-.card-actions button,
-.card-actions a{
-  width:100%;
-  min-height:52px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  white-space:normal;
-  line-height:1.2;
-}
-
-@media(max-width:700px){
-  .album-photo-grid,
-  #photoGrid{
-    grid-template-columns:1fr;
-  }
-
-  .image-wrap{
-    height:390px;
-  }
-}
 </style>
 </head>
 
@@ -798,7 +737,7 @@ header{padding:17px 5%}
 <section class="hero">
 <span class="kicker">Private Proofing Portal</span>
 <h1>Your Sunset Gallery</h1>
-<p>View your private proofs, favorite the images you love, request prints or extra edits, and purchase individual photos, albums, or full galleries.</p>
+<p>View your private proofs, favorite the images you want edited, and download finished approved photos in a separate section once they are ready.</p>
 </section>
 
 <div class="access-box" id="accessBox">
@@ -1133,10 +1072,25 @@ function renderGallery(){
 const grid = document.getElementById("photoGrid");
 grid.innerHTML = "";
 
+const finalPhotos = currentPhotos.filter(photo => photo.photo_stage === "final");
+const proofPhotos = currentPhotos.filter(photo => photo.photo_stage !== "final");
+
+if(finalPhotos.length){
+const finishedSection = renderPhotoSection({
+title: "Your Finished / Approved Photos",
+description: "These are the edited final photos uploaded by Sunset Trails. Downloads are unlocked here so they stay separate from your proof selections.",
+priceText: "Ready to download",
+buttonHtml: "",
+photos: finalPhotos
+});
+
+grid.appendChild(finishedSection);
+}
+
 const groupedPhotoIds = new Set();
 
 currentAlbums.forEach(album => {
-const albumPhotos = currentPhotos.filter(photo => photo.album_id === album.id);
+const albumPhotos = proofPhotos.filter(photo => photo.album_id === album.id);
 albumPhotos.forEach(photo => groupedPhotoIds.add(photo.id));
 
 const price = Number(album.album_price || 0);
@@ -1155,12 +1109,12 @@ photos: albumPhotos
 grid.appendChild(section);
 });
 
-const ungroupedPhotos = currentPhotos.filter(photo => !photo.album_id || !groupedPhotoIds.has(photo.id));
+const ungroupedPhotos = proofPhotos.filter(photo => !photo.album_id || !groupedPhotoIds.has(photo.id));
 
-if(ungroupedPhotos.length || !currentAlbums.length){
+if(ungroupedPhotos.length || (!currentAlbums.length && !finalPhotos.length)){
 const section = renderPhotoSection({
-title: currentAlbums.length ? "Individual Photos" : "Gallery Photos",
-description: currentAlbums.length ? "These photos are available outside of a specific album." : "Browse your private proofing gallery below.",
+title: currentAlbums.length ? "Proofs / Individual Photos" : "Proof Gallery",
+description: currentAlbums.length ? "These proof photos are available outside of a specific album." : "Choose favorites, request edits, or purchase individual proof photos below.",
 priceText: "",
 buttonHtml: "",
 photos: ungroupedPhotos
