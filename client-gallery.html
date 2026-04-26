@@ -729,6 +729,165 @@ header{padding:17px 5%}
 .edit-pay-btn{background:linear-gradient(135deg,#ffd38a,#c77b28);color:#1b0e04;}
 .selection-summary{margin-top:12px;padding:14px 16px;border-radius:18px;background:rgba(255,211,138,.11);border:1px solid rgba(255,211,138,.22);color:#f3d9b9;font-size:14px;line-height:1.5;}
 .selection-summary strong{color:#ffd38a}
+
+  /* FINAL MOBILE + CLIENT GALLERY LAYOUT FIX */
+
+.gallery-wrap{
+  width:100%;
+  overflow:hidden;
+}
+
+.album-section,
+.finished-section,
+.proof-section,
+.selection-checkout,
+.cart-bar{
+  width:100%;
+  max-width:100%;
+}
+
+.grid,
+.album-photo-grid,
+#photoGrid,
+#proofGrid,
+#finalGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:24px;
+  width:100%;
+}
+
+.card{
+  width:100%;
+  min-width:0;
+}
+
+.image-wrap{
+  width:100%;
+  height:340px;
+}
+
+.card-content{
+  padding:22px;
+}
+
+.card-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+
+.card-actions button,
+.card-actions a{
+  width:100%;
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  white-space:normal;
+  line-height:1.2;
+}
+
+.cart-bar,
+.selection-checkout{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.cart-bar > div,
+.selection-checkout > div{
+  min-width:260px;
+  flex:1;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+  header{
+    padding:15px 5%;
+  }
+
+  .logo{
+    font-size:20px;
+  }
+
+  .hero{
+    padding:58px 5% 30px;
+  }
+
+  .hero h1{
+    font-size:44px;
+  }
+
+  .hero p{
+    font-size:15px;
+  }
+
+  .gallery-wrap{
+    padding:10px 5% 70px;
+  }
+
+  .gallery-top{
+    display:block;
+  }
+
+  .gallery-top .actions{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .instructions{
+    grid-template-columns:1fr;
+  }
+
+  .grid,
+  .album-photo-grid,
+  #photoGrid,
+  #proofGrid,
+  #finalGrid{
+    grid-template-columns:1fr;
+    gap:22px;
+  }
+
+  .image-wrap{
+    height:360px;
+  }
+
+  .album-card,
+  .selection-checkout,
+  .cart-bar{
+    display:block;
+    padding:22px;
+  }
+
+  .album-card .actions,
+  .cart-bar .actions,
+  .selection-checkout .actions{
+    display:grid;
+    grid-template-columns:1fr;
+    margin-top:15px;
+  }
+
+  .album-card button,
+  .cart-bar button,
+  .selection-checkout button{
+    width:100%;
+    margin-top:10px;
+  }
+
+  .modal-box{
+    padding:24px;
+    border-radius:24px;
+  }
+
+  .viewer-box img{
+    max-height:70vh;
+  }
+}
 </style>
 </head>
 
