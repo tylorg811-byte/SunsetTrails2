@@ -698,7 +698,7 @@ reveals.forEach(el=>revealObserver.observe(el));
 document.getElementById("year").textContent=new Date().getFullYear();
 
 /* =========================
-   PORTAL TRACKING - FIXED
+   PORTAL TRACKING - FIXED + LOCATION
    Sunset Trails Photography
 ========================= */
 const PORTAL_TRACKING={
@@ -720,35 +720,6 @@ const PORTAL_TRACKING={
   }
 
   const trackingClient=window.supabase.createClient(
-  // LOCATION TRACKING
-  let cachedVisitorLocation = null;
-
-  async function getVisitorLocation(){
-    if(cachedVisitorLocation) return cachedVisitorLocation;
-
-    const fallback = {
-      visitor_country:"",
-      visitor_region:"",
-      visitor_timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || ""
-    };
-
-    try{
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-
-      cachedVisitorLocation = {
-        visitor_country:data.country_name || "",
-        visitor_region:data.region || "",
-        visitor_timezone:data.timezone || fallback.visitor_timezone
-      };
-
-      return cachedVisitorLocation;
-    }catch(e){
-      cachedVisitorLocation = fallback;
-      return cachedVisitorLocation;
-    }
-  }
-
     PORTAL_TRACKING.supabaseUrl,
     PORTAL_TRACKING.supabaseAnonKey,
     {
@@ -774,6 +745,7 @@ const PORTAL_TRACKING={
   let hasTracked50=false;
   let hasTracked75=false;
   let hasTracked90=false;
+  let cachedVisitorLocation=null;
 
   function getDevice(){
     if(window.innerWidth<=600)return"mobile";
@@ -786,8 +758,37 @@ const PORTAL_TRACKING={
     return path === "/" ? "/index.html" : path;
   }
 
+  async function getVisitorLocation(){
+    if(cachedVisitorLocation)return cachedVisitorLocation;
+
+    const fallback={
+      visitor_country:"",
+      visitor_region:"",
+      visitor_timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || ""
+    };
+
+    try{
+      const res=await fetch("https://ipapi.co/json/");
+      if(!res.ok) throw new Error("Location lookup failed.");
+
+      const data=await res.json();
+
+      cachedVisitorLocation={
+        visitor_country:data.country_name || data.country || "",
+        visitor_region:data.region || "",
+        visitor_timezone:data.timezone || fallback.visitor_timezone
+      };
+
+      return cachedVisitorLocation;
+    }catch(error){
+      cachedVisitorLocation=fallback;
+      return cachedVisitorLocation;
+    }
+  }
+
   async function trackPageView(){
-      const visitorLocation = await getVisitorLocation();
+    const visitorLocation=await getVisitorLocation();
+
     try{
       const { error } = await trackingClient.from(PORTAL_TRACKING.analyticsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
@@ -797,9 +798,6 @@ const PORTAL_TRACKING={
         referrer:document.referrer || "direct",
         device:getDevice(),
         session_id:sessionId,
-        visitor_country:visitorLocation.visitor_country,
-        visitor_region:visitorLocation.visitor_region,
-        visitor_timezone:visitorLocation.visitor_timezone,
         user_agent:navigator.userAgent,
         visitor_country:visitorLocation.visitor_country,
         visitor_region:visitorLocation.visitor_region,
@@ -813,7 +811,8 @@ const PORTAL_TRACKING={
   }
 
   async function trackEvent(eventName,eventData={}){
-      const visitorLocation = await getVisitorLocation();
+    const visitorLocation=await getVisitorLocation();
+
     try{
       const { error } = await trackingClient.from(PORTAL_TRACKING.eventsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
