@@ -409,6 +409,7 @@ transform:translateY(-2px);
 box-shadow:0 15px 35px rgba(199,123,40,.5);
 }
 </style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%23120b05%27/%3E%3Ccircle cx=%2750%27 cy=%2748%27 r=%2730%27 fill=%27%23ffd08a%27/%3E%3Cpath d=%27M18 66 Q50 42 82 66%27 stroke=%27%23d57a25%27 stroke-width=%278%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
 </head>
 
 <body>
@@ -623,55 +624,27 @@ const PORTAL_TRACKING={
     return;
   }
 
-  if(
-    PORTAL_TRACKING.supabaseUrl.includes("YOUR_") ||
-    PORTAL_TRACKING.supabaseAnonKey.includes("YOUR_") ||
-    PORTAL_TRACKING.clientId.includes("YOUR_") ||
-    PORTAL_TRACKING.siteId.includes("YOUR_")
-  ){
-    console.warn("Portal tracking skipped: tracking placeholders are not filled.");
-    return;
-  }
-
-  const client=window.supabase.createClient(
+  const trackingClient=window.supabase.createClient(
     PORTAL_TRACKING.supabaseUrl,
     PORTAL_TRACKING.supabaseAnonKey,
     {
       auth:{
         persistSession:false,
         autoRefreshToken:false,
-        detectSessionInUrl:false
+        detectSessionInUrl:false,
+        storage:null
+      },
+      global:{
+        headers:{
+          "x-portal-site":"sunset-trails-photography"
+        }
       }
     }
   );
 
-  const sessionKey="sunset_trails_session_id";
-
-  function safeUUID(){
-    if(window.crypto && crypto.randomUUID){
-      return crypto.randomUUID();
-    }
-    return "session_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-  }
-
-  function getStoredSession(){
-    try{
-      const saved=sessionStorage.getItem(sessionKey) || localStorage.getItem(sessionKey);
-      if(saved)return saved;
-
-      const created=safeUUID();
-
-      try{sessionStorage.setItem(sessionKey,created);}catch(e){}
-      try{localStorage.setItem(sessionKey,created);}catch(e){}
-
-      return created;
-    }catch(error){
-      return safeUUID();
-    }
-  }
-
-  const sessionId=getStoredSession();
+  const sessionId="session_" + Date.now() + "_" + Math.random().toString(36).slice(2);
   const startedAt=Date.now();
+
   let maxScroll=0;
   let hasTracked25=false;
   let hasTracked50=false;
@@ -691,7 +664,7 @@ const PORTAL_TRACKING={
 
   async function trackPageView(){
     try{
-      await client.from(PORTAL_TRACKING.analyticsTable).insert({
+      const { error } = await trackingClient.from(PORTAL_TRACKING.analyticsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
         site_id:PORTAL_TRACKING.siteId,
         page:getPage(),
@@ -699,9 +672,10 @@ const PORTAL_TRACKING={
         referrer:document.referrer || "direct",
         device:getDevice(),
         session_id:sessionId,
-        user_agent:navigator.userAgent,
-        created_at:new Date().toISOString()
+        user_agent:navigator.userAgent
       });
+
+      if(error) console.warn("Portal tracking table error:",error.message);
     }catch(error){
       console.warn("Portal tracking error:",error);
     }
@@ -709,15 +683,16 @@ const PORTAL_TRACKING={
 
   async function trackEvent(eventName,eventData={}){
     try{
-      await client.from(PORTAL_TRACKING.eventsTable).insert({
+      const { error } = await trackingClient.from(PORTAL_TRACKING.eventsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
         site_id:PORTAL_TRACKING.siteId,
         event_name:eventName,
         event_data:eventData,
         page:getPage(),
-        session_id:sessionId,
-        created_at:new Date().toISOString()
+        session_id:sessionId
       });
+
+      if(error) console.warn("Portal event table error:",error.message);
     }catch(error){
       console.warn("Portal event error:",error);
     }
@@ -762,18 +737,7 @@ const PORTAL_TRACKING={
       trackEvent("link_click",{
         text:(link.innerText || link.getAttribute("aria-label") || "link").trim(),
         href:link.href || "",
-        is_client_gallery:link.href.includes("client-gallery"),
-        is_booking_link:link.getAttribute("href")==="#booking",
-        is_portal_link:link.href.includes("YOUR_PORTAL_URL_HERE") ? false : link.classList.contains("client-portal-btn")
-      });
-    });
-  });
-
-  document.querySelectorAll(".btn.primary,.btn.secondary,.client-portal-btn").forEach(button=>{
-    button.addEventListener("click",()=>{
-      trackEvent("cta_click",{
-        text:(button.innerText || "CTA").trim(),
-        href:button.href || button.getAttribute("href") || ""
+        section:link.getAttribute("href") || ""
       });
     });
   });
@@ -786,25 +750,13 @@ const PORTAL_TRACKING={
     });
   });
 
-  window.addEventListener("beforeunload",()=>{
-    const seconds=Math.round((Date.now()-startedAt)/1000);
-
-    const payload={
-      client_id:PORTAL_TRACKING.clientId,
-      site_id:PORTAL_TRACKING.siteId,
-      event_name:"page_exit",
-      event_data:{
-        seconds_on_page:seconds,
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="hidden"){
+      trackEvent("page_exit",{
+        seconds_on_page:Math.round((Date.now()-startedAt)/1000),
         max_scroll_percent:maxScroll
-      },
-      page:getPage(),
-      session_id:sessionId,
-      created_at:new Date().toISOString()
-    };
-
-    try{
-      client.from(PORTAL_TRACKING.eventsTable).insert(payload);
-    }catch(error){}
+      });
+    }
   });
 })();
 </script>
