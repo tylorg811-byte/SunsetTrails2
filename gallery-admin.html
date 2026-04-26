@@ -530,6 +530,220 @@ header{padding:16px 5%}
 .queue-card h3{font-family:'Playfair Display',serif;color:#ffd38a;font-size:28px;margin-bottom:8px;}
 .queue-meta{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0;}
 .pill{display:inline-flex;padding:7px 11px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,211,138,.2);color:#ffd38a;font-size:12px;font-weight:900;}
+
+/* ADMIN LAYOUT CLEANUP - PREMIUM DASHBOARD */
+.container{
+max-width:1600px;
+}
+
+.stats{
+grid-template-columns:repeat(5,1fr);
+}
+
+.gallery-list{
+display:block!important;
+width:100%;
+}
+
+.gallery-card{
+width:100%;
+display:block;
+padding:0;
+overflow:hidden;
+border-radius:28px;
+background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+border:1px solid rgba(255,211,138,.2);
+box-shadow:0 24px 70px rgba(0,0,0,.24);
+}
+
+.gallery-card-main{
+padding:24px;
+display:grid;
+grid-template-columns:1.2fr 1.8fr;
+gap:24px;
+align-items:start;
+}
+
+.gallery-card-title h3{
+font-size:34px;
+margin-bottom:8px;
+}
+
+.gallery-card-meta{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin:12px 0;
+}
+
+.admin-pill{
+display:inline-flex;
+align-items:center;
+gap:6px;
+padding:8px 12px;
+border-radius:999px;
+background:rgba(255,211,138,.12);
+border:1px solid rgba(255,211,138,.22);
+color:#ffd38a;
+font-size:12px;
+font-weight:900;
+}
+
+.gallery-card-stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+margin-bottom:16px;
+}
+
+.gallery-mini-stat{
+padding:15px;
+border-radius:18px;
+background:rgba(0,0,0,.22);
+border:1px solid rgba(255,255,255,.1);
+}
+
+.gallery-mini-stat strong{
+display:block;
+font-size:22px;
+color:#ffd38a;
+line-height:1;
+margin-bottom:6px;
+}
+
+.gallery-mini-stat span{
+font-size:12px;
+color:#f3d9b9;
+font-weight:800;
+}
+
+.gallery-card-actions{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+gap:10px;
+margin-top:14px;
+}
+
+.gallery-card-actions button{
+width:100%;
+min-height:48px;
+}
+
+.gallery-card .album-list,
+.gallery-card .photos{
+padding:0 24px 24px;
+}
+
+.gallery-card .photos{
+grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+}
+
+.gallery-card .photo{
+width:100%;
+}
+
+.album-list{
+display:block!important;
+width:100%;
+}
+
+.album-card{
+width:100%;
+max-width:none;
+display:grid;
+grid-template-columns:1fr auto;
+gap:20px;
+align-items:center;
+padding:24px;
+border-radius:24px;
+background:linear-gradient(135deg,rgba(255,211,138,.12),rgba(255,255,255,.045));
+border:1px solid rgba(255,211,138,.28);
+box-shadow:0 20px 55px rgba(0,0,0,.22);
+margin-bottom:14px;
+}
+
+.album-card strong{
+font-size:32px;
+line-height:1.05;
+}
+
+.album-card .actions{
+justify-content:flex-end;
+margin-top:0;
+}
+
+.album-card .actions button{
+min-width:160px;
+}
+
+.list{
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+}
+
+.panel > h2{
+font-size:34px;
+}
+
+@media(max-width:1100px){
+.stats{
+grid-template-columns:repeat(2,1fr);
+}
+
+.gallery-card-main{
+grid-template-columns:1fr;
+}
+
+.gallery-card-stats{
+grid-template-columns:repeat(2,1fr);
+}
+}
+
+@media(max-width:700px){
+.stats{
+grid-template-columns:1fr;
+}
+
+.gallery-card-main{
+padding:20px;
+}
+
+.gallery-card-title h3{
+font-size:30px;
+}
+
+.gallery-card-stats{
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.gallery-card-actions{
+grid-template-columns:1fr;
+}
+
+.gallery-card .album-list,
+.gallery-card .photos{
+padding:0 20px 20px;
+}
+
+.album-card{
+grid-template-columns:1fr;
+}
+
+.album-card .actions{
+justify-content:flex-start;
+display:grid;
+grid-template-columns:1fr;
+}
+
+.album-card .actions button{
+width:100%;
+}
+
+.list{
+grid-template-columns:1fr;
+}
+}
+
 </style>
 </head>
 
@@ -968,7 +1182,91 @@ document.getElementById("notes").value = "";
 await loadGalleries();
 }
 
+
+function getGalleryViewCount(galleryId){
+if(!window.galleryViewCounts) return 0;
+return window.galleryViewCounts[galleryId] || 0;
+}
+
+function getGalleryFavoriteCount(galleryId){
+if(!window.galleryFavoriteCounts) return 0;
+return window.galleryFavoriteCounts[galleryId] || 0;
+}
+
+function getGalleryPaidEditCount(galleryId){
+if(!window.galleryPaidEditCounts) return 0;
+return window.galleryPaidEditCounts[galleryId] || 0;
+}
+
+function getGalleryOrderCount(galleryId){
+if(!window.galleryOrderCounts) return 0;
+return window.galleryOrderCounts[galleryId] || 0;
+}
+
+async function loadGalleryCardStats(){
+window.galleryViewCounts = {};
+window.galleryFavoriteCounts = {};
+window.galleryPaidEditCounts = {};
+window.galleryOrderCounts = {};
+
+try{
+const { data: views } = await supabaseClient
+.from("gallery_activity")
+.select("gallery_id")
+.eq("event_type","gallery_view");
+
+(views || []).forEach(v => {
+if(!v.gallery_id) return;
+window.galleryViewCounts[v.gallery_id] = (window.galleryViewCounts[v.gallery_id] || 0) + 1;
+});
+}catch(err){
+console.log("View stats skipped", err);
+}
+
+try{
+const { data: favorites } = await supabaseClient
+.from("client_favorites")
+.select("gallery_id");
+
+(favorites || []).forEach(f => {
+if(!f.gallery_id) return;
+window.galleryFavoriteCounts[f.gallery_id] = (window.galleryFavoriteCounts[f.gallery_id] || 0) + 1;
+});
+}catch(err){
+console.log("Favorite stats skipped", err);
+}
+
+try{
+const { data: editOrders } = await supabaseClient
+.from("paid_edit_orders")
+.select("gallery_id");
+
+(editOrders || []).forEach(o => {
+if(!o.gallery_id) return;
+window.galleryPaidEditCounts[o.gallery_id] = (window.galleryPaidEditCounts[o.gallery_id] || 0) + 1;
+});
+}catch(err){
+console.log("Paid edit stats skipped", err);
+}
+
+try{
+const { data: orders } = await supabaseClient
+.from("photo_orders")
+.select("gallery_id");
+
+(orders || []).forEach(o => {
+if(!o.gallery_id) return;
+window.galleryOrderCounts[o.gallery_id] = (window.galleryOrderCounts[o.gallery_id] || 0) + 1;
+});
+}catch(err){
+console.log("Order stats skipped", err);
+}
+}
+
+
 async function loadGalleries(){
+await loadGalleryCardStats();
+
 const { data, error } = await supabaseClient
 .from("client_galleries")
 .select("*")
@@ -1001,21 +1299,36 @@ const card = document.createElement("div");
 card.className = "gallery-card";
 
 card.innerHTML = `
+<div class="gallery-card-main">
+<div class="gallery-card-title">
 <h3>${gallery.client_name}</h3>
 <p>${gallery.package_name || "No package listed"}</p>
-<span class="code">${gallery.gallery_code}</span>
+<div class="gallery-card-meta">
+<span class="admin-pill">${gallery.gallery_code}</span>
+<span class="admin-pill">${gallery.is_active === false ? "Hidden" : "Active"}</span>
+<span class="admin-pill">$${Number(gallery.edit_price_per_photo || 10).toFixed(2)} / edit</span>
+</div>
 <p>${gallery.notes || ""}</p>
 <p><b>Full Gallery:</b> $${Number(gallery.full_gallery_price || 0).toFixed(2)}</p>
-<p><b>Edit Price:</b> $${Number(gallery.edit_price_per_photo || 10).toFixed(2)} per selected photo</p>
-<p><b>Status:</b> ${gallery.is_active === false ? "Inactive / Hidden" : "Active / Client Can View"}</p>
+</div>
 
-<div class="actions">
+<div>
+<div class="gallery-card-stats">
+<div class="gallery-mini-stat"><strong>${getGalleryViewCount(gallery.id)}</strong><span>Views</span></div>
+<div class="gallery-mini-stat"><strong>${getGalleryFavoriteCount(gallery.id)}</strong><span>Favorites</span></div>
+<div class="gallery-mini-stat"><strong>${getGalleryPaidEditCount(gallery.id)}</strong><span>Paid Edits</span></div>
+<div class="gallery-mini-stat"><strong>${getGalleryOrderCount(gallery.id)}</strong><span>Orders</span></div>
+</div>
+
+<div class="gallery-card-actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
 <button class="secondary" onclick="viewPhotos('${gallery.id}')">View Proofs</button>
 <button class="secondary" onclick="viewFinishedPhotos('${gallery.id}')">View Finished</button>
 <button class="secondary" onclick="viewAlbums('${gallery.id}')">Manage Albums</button>
 <button class="secondary" onclick="editGallery('${gallery.id}')">Edit Gallery</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
+</div>
+</div>
 </div>
 
 <div class="album-list" id="albums-${gallery.id}" data-open="false"></div>
@@ -1260,15 +1573,24 @@ return album ? album.album_name : "Album";
 }
 
 async function viewAlbumPhotos(galleryId, albumId){
-currentGalleryId = galleryId;
-
 const box = document.getElementById("photos-" + galleryId);
 if(!box) return;
+
+if(box.dataset.open === "true" && box.dataset.album === String(albumId)){
+box.innerHTML = "";
+box.dataset.open = "false";
+box.dataset.album = "";
+return;
+}
+
+currentGalleryId = galleryId;
 
 await loadUploadAlbums(galleryId);
 
 box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
 box.dataset.open = "true";
+box.dataset.album = String(albumId);
+box.dataset.stage = "album";
 
 const { data, error } = await supabaseClient
 .from("gallery_photos")
@@ -1295,7 +1617,7 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} - ${getAlbumName(galleryId, photo.album_id)} - $${Number(photo.price || 0).toFixed(2)}</span>
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} - $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
@@ -1999,6 +2321,7 @@ div.innerHTML = `
 <div class="photos">${thumbs || `<p style="color:#f3d9b9;">No thumbnails found.</p>`}</div>
 <div class="actions">
 <button onclick="updateEditingStatus('${order.id}','editing')">Mark Editing</button>
+<button onclick="quickUploadFinalsForGallery('${order.gallery_id}')">Upload Finals</button>
 <button onclick="updateEditingStatus('${order.id}','completed')">Mark Completed</button>
 <button class="secondary" onclick="copySelectedPhotoIds('${selectedIds.join(",")}' )">Copy Photo IDs</button>
 </div>
@@ -2007,6 +2330,25 @@ div.innerHTML = `
 box.appendChild(div);
 });
 }
+
+
+function quickUploadFinalsForGallery(galleryId){
+const gallerySelect = document.getElementById("gallerySelect");
+if(gallerySelect){
+gallerySelect.value = galleryId;
+gallerySelect.dispatchEvent(new Event("change"));
+}
+setUploadMode("final");
+const uploadPanel = [...document.querySelectorAll(".panel")].find(panel => panel.textContent.includes("Upload Photos"));
+if(uploadPanel){
+uploadPanel.scrollIntoView({behavior:"smooth", block:"start"});
+}
+const msg = document.getElementById("uploadMessage");
+if(msg){
+msg.textContent = "Upload Finals mode selected for this client.";
+}
+}
+
 
 async function updateEditingStatus(orderId,status){
 const { error } = await supabaseClient
