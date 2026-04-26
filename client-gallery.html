@@ -888,6 +888,12 @@ header{padding:17px 5%}
     max-height:70vh;
   }
 }
+
+.favorite-chip{
+font-family:Arial, Helvetica, sans-serif!important;
+line-height:1!important;
+}
+
 </style>
 </head>
 
@@ -1212,7 +1218,7 @@ card.innerHTML = `
 <img src="${photo.image_url}" alt="${photo.caption || 'Client photo'}">
 ${showWatermark ? `<div class="watermark-overlay"><span>Sunset Trails</span></div>` : ""}
 <span class="status">${photo.is_approved ? "Approved Final" : "Proof Preview"}</span>
-<button class="favorite-chip ${isFav ? "active" : ""}" onclick="event.stopPropagation();toggleFavorite('${photo.id}')">${isFav ? "â¥" : "â¡"}</button>
+<button class="favorite-chip ${isFav ? "active" : ""}" onclick="event.stopPropagation();toggleFavorite('${photo.id}')">${isFav ? "&hearts;" : "&#9825;"}</button>
 </div>
 
 <div class="card-content">
