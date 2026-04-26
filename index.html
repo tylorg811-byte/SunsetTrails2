@@ -720,6 +720,35 @@ const PORTAL_TRACKING={
   }
 
   const trackingClient=window.supabase.createClient(
+  // LOCATION TRACKING
+  let cachedVisitorLocation = null;
+
+  async function getVisitorLocation(){
+    if(cachedVisitorLocation) return cachedVisitorLocation;
+
+    const fallback = {
+      visitor_country:"",
+      visitor_region:"",
+      visitor_timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || ""
+    };
+
+    try{
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+
+      cachedVisitorLocation = {
+        visitor_country:data.country_name || "",
+        visitor_region:data.region || "",
+        visitor_timezone:data.timezone || fallback.visitor_timezone
+      };
+
+      return cachedVisitorLocation;
+    }catch(e){
+      cachedVisitorLocation = fallback;
+      return cachedVisitorLocation;
+    }
+  }
+
     PORTAL_TRACKING.supabaseUrl,
     PORTAL_TRACKING.supabaseAnonKey,
     {
@@ -758,6 +787,7 @@ const PORTAL_TRACKING={
   }
 
   async function trackPageView(){
+      const visitorLocation = await getVisitorLocation();
     try{
       const { error } = await trackingClient.from(PORTAL_TRACKING.analyticsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
@@ -767,7 +797,13 @@ const PORTAL_TRACKING={
         referrer:document.referrer || "direct",
         device:getDevice(),
         session_id:sessionId,
-        user_agent:navigator.userAgent
+        visitor_country:visitorLocation.visitor_country,
+        visitor_region:visitorLocation.visitor_region,
+        visitor_timezone:visitorLocation.visitor_timezone,
+        user_agent:navigator.userAgent,
+        visitor_country:visitorLocation.visitor_country,
+        visitor_region:visitorLocation.visitor_region,
+        visitor_timezone:visitorLocation.visitor_timezone
       });
 
       if(error) console.warn("Portal tracking table error:",error.message);
@@ -777,6 +813,7 @@ const PORTAL_TRACKING={
   }
 
   async function trackEvent(eventName,eventData={}){
+      const visitorLocation = await getVisitorLocation();
     try{
       const { error } = await trackingClient.from(PORTAL_TRACKING.eventsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
@@ -784,7 +821,10 @@ const PORTAL_TRACKING={
         event_name:eventName,
         event_data:eventData,
         page:getPage(),
-        session_id:sessionId
+        session_id:sessionId,
+        visitor_country:visitorLocation.visitor_country,
+        visitor_region:visitorLocation.visitor_region,
+        visitor_timezone:visitorLocation.visitor_timezone
       });
 
       if(error) console.warn("Portal event table error:",error.message);
