@@ -530,174 +530,6 @@ header{padding:16px 5%}
 .queue-card h3{font-family:'Playfair Display',serif;color:#ffd38a;font-size:28px;margin-bottom:8px;}
 .queue-meta{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0;}
 .pill{display:inline-flex;padding:7px 11px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,211,138,.2);color:#ffd38a;font-size:12px;font-weight:900;}
-
-/* ===============================
-   FULL UPGRADE ADMIN POLISH
-   Keeps your original design, adds SaaS-style sections
-================================ */
-.dashboard-grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:14px;
-margin-bottom:22px;
-}
-
-.dashboard-card{
-background:rgba(255,255,255,.07);
-border:1px solid rgba(255,211,138,.16);
-border-radius:20px;
-padding:18px;
-}
-
-.dashboard-card strong{
-display:block;
-font-size:30px;
-color:#ffd38a;
-}
-
-.dashboard-card span{
-font-size:13px;
-color:#f3d9b9;
-font-weight:800;
-}
-
-.activity-row,
-.comment-row,
-.package-row{
-background:rgba(255,255,255,.06);
-border:1px solid rgba(255,211,138,.14);
-border-radius:18px;
-padding:16px;
-margin-bottom:14px;
-}
-
-.activity-row strong,
-.comment-row strong,
-.package-row strong{
-color:#ffd38a;
-}
-
-.activity-row p,
-.comment-row p,
-.package-row p{
-color:#f3d9b9;
-font-size:14px;
-line-height:1.5;
-margin-top:5px;
-}
-
-/* Full-width album strip inside existing gallery cards */
-.gallery-list{
-display:block;
-width:100%;
-}
-
-.gallery-card{
-width:100%;
-max-width:none;
-overflow:hidden;
-}
-
-.album-list{
-display:block;
-width:100%;
-margin-top:24px;
-}
-
-.album-card{
-width:100%;
-max-width:none;
-display:grid;
-grid-template-columns:1fr auto;
-align-items:center;
-gap:26px;
-padding:26px 28px;
-border-radius:24px;
-background:linear-gradient(135deg,rgba(255,211,138,.12),rgba(255,255,255,.045));
-border:1px solid rgba(255,211,138,.28);
-box-shadow:0 20px 55px rgba(0,0,0,.22);
-}
-
-.album-card strong{
-display:block;
-font-size:34px;
-line-height:1.05;
-margin-bottom:6px;
-}
-
-.album-card p{
-max-width:none;
-font-size:15px;
-}
-
-.album-card .actions{
-display:flex;
-justify-content:flex-end;
-align-items:center;
-gap:12px;
-margin-top:0;
-flex-wrap:wrap;
-}
-
-.album-card .actions button{
-min-width:180px;
-white-space:nowrap;
-}
-
-.mini-note{
-font-size:13px;
-color:#f3d9b9;
-line-height:1.5;
-margin-top:8px;
-}
-
-@media(max-width:900px){
-.dashboard-grid{
-grid-template-columns:1fr 1fr;
-}
-
-.album-card{
-grid-template-columns:1fr;
-}
-
-.album-card .actions{
-justify-content:flex-start;
-}
-
-.album-card .actions button{
-width:100%;
-}
-}
-
-@media(max-width:700px){
-.dashboard-grid{
-grid-template-columns:1fr;
-}
-
-button{
-min-height:48px;
-}
-
-.actions{
-display:grid;
-grid-template-columns:1fr;
-width:100%;
-}
-
-.actions button,
-.actions a{
-width:100%;
-}
-
-.panel{
-border-radius:24px;
-}
-
-input,textarea,select{
-font-size:16px;
-}
-}
-
 </style>
 </head>
 
@@ -738,6 +570,7 @@ font-size:16px;
 <div class="stat"><strong id="statFavorites">0</strong><span>Favorites</span></div>
 <div class="stat"><strong id="statRequests">0</strong><span>Requests</span></div>
 <div class="stat"><strong id="statOrders">0</strong><span>Orders</span></div>
+<div class="stat"><strong id="statViews">0</strong><span>Gallery Views</span></div>
 </div>
 
 <div class="panel">
@@ -914,6 +747,14 @@ font-size:16px;
 </div>
 
 <div class="panel">
+<h2>Gallery View Counts</h2><br>
+<button onclick="loadGalleryViews()">Refresh Views</button>
+<button class="danger" onclick="clearGalleryViews()">Clear View Records</button>
+<br><br>
+<div class="list" id="galleryViewsList"></div>
+</div>
+
+<div class="panel">
 <h2>Favorites</h2><br>
 <button onclick="loadFavorites()">Refresh Favorites</button>
 <button class="danger" onclick="clearAllFavorites()">Clear All Favorites</button>
@@ -926,77 +767,6 @@ font-size:16px;
 <button onclick="loadEditingQueue()">Refresh Editing Queue</button>
 <br><br>
 <div class="list" id="editingQueueList"></div>
-</div>
-
-
-<div class="panel">
-<h2>Revenue Dashboard</h2><br>
-<button onclick="loadRevenueDashboard()">Refresh Revenue</button>
-<br><br>
-
-<div class="dashboard-grid">
-<div class="dashboard-card"><strong id="revTotal">$0.00</strong><span>Total Revenue</span></div>
-<div class="dashboard-card"><strong id="revOrders">0</strong><span>Total Orders</span></div>
-<div class="dashboard-card"><strong id="revEditOrders">0</strong><span>Paid Editing Jobs</span></div>
-<div class="dashboard-card"><strong id="revAvg">$0.00</strong><span>Average Order</span></div>
-</div>
-
-<div id="revenueList"></div>
-</div>
-
-<div class="panel">
-<h2>Client Activity</h2><br>
-<button onclick="loadActivity()">Refresh Activity</button>
-<button class="danger" onclick="clearActivity()">Clear Activity</button>
-<br><br>
-<div class="list" id="activityList"></div>
-</div>
-
-<div class="panel">
-<h2>Photo Comments / Edit Notes</h2><br>
-<button onclick="loadPhotoComments()">Refresh Comments</button>
-<br><br>
-<div class="list" id="commentsList"></div>
-</div>
-
-<div class="panel">
-<h2>Edit Packages / Bundles</h2><br>
-<p class="sub" style="margin-bottom:15px;">Create bundle pricing for selected edits. Example: 5 photos for $40, 10 photos for $70.</p>
-
-<div class="grid">
-<div class="field">
-<label>Select Gallery</label>
-<select id="packageGallerySelect"></select>
-</div>
-
-<div class="field">
-<label>Package Name</label>
-<input id="packageNameInput" placeholder="5 Photo Edit Package">
-</div>
-</div>
-
-<div class="grid">
-<div class="field">
-<label>Number of Photos</label>
-<input id="packagePhotoCountInput" type="number" placeholder="5">
-</div>
-
-<div class="field">
-<label>Package Price</label>
-<input id="packagePriceInput" type="number" step="0.01" placeholder="40.00">
-</div>
-</div>
-
-<div class="field">
-<label>Package Description</label>
-<input id="packageDescriptionInput" placeholder="Best for clients who only need a few favorites edited.">
-</div>
-
-<button onclick="createEditPackage()">Create Package</button>
-<button class="secondary" onclick="loadEditPackages()">Refresh Packages</button>
-<div class="message" id="packageMessage"></div>
-<br><br>
-<div id="packagesList"></div>
 </div>
 
 <div class="panel">
@@ -1130,12 +900,9 @@ await refreshAll();
 
 async function refreshAll(){
 await loadGalleries();
+await loadGalleryViews();
 await loadFavorites();
 await loadEditingQueue();
-await loadRevenueDashboard();
-await loadActivity();
-await loadPhotoComments();
-await loadEditPackages();
 await loadRequests();
 await loadOrders();
 }
@@ -1214,11 +981,9 @@ allGalleries = data || [];
 document.getElementById("statGalleries").textContent = allGalleries.length;
 
 const select = document.getElementById("gallerySelect");
-const packageSelect = document.getElementById("packageGallerySelect");
 const list = document.getElementById("galleryList");
 
 select.innerHTML = "";
-if(packageSelect) packageSelect.innerHTML = "";
 list.innerHTML = "";
 
 if(!allGalleries.length){
@@ -1229,15 +994,8 @@ return;
 allGalleries.forEach(gallery => {
 const opt = document.createElement("option");
 opt.value = gallery.id;
-opt.textContent = gallery.client_name + " â " + gallery.gallery_code;
+opt.textContent = gallery.client_name + " - " + gallery.gallery_code;
 select.appendChild(opt);
-
-if(packageSelect){
-const pOpt = document.createElement("option");
-pOpt.value = gallery.id;
-pOpt.textContent = gallery.client_name + " â " + gallery.gallery_code;
-packageSelect.appendChild(pOpt);
-}
 
 const card = document.createElement("div");
 card.className = "gallery-card";
@@ -1319,7 +1077,7 @@ albumCache[galleryId] = data || [];
 if(!album.id) return;
 const opt = document.createElement("option");
 opt.value = String(album.id);
-opt.textContent = `${album.album_name || "Untitled Album"} â $${Number(album.album_price || 0).toFixed(2)}`;
+opt.textContent = `${album.album_name || "Untitled Album"} - $${Number(album.album_price || 0).toFixed(2)}`;
 select.appendChild(opt);
 });
 }
@@ -1507,20 +1265,10 @@ currentGalleryId = galleryId;
 const box = document.getElementById("photos-" + galleryId);
 if(!box) return;
 
-/* Click once opens, click again closes this exact album */
-if(box.dataset.open === "true" && box.dataset.album === String(albumId)){
-box.innerHTML = "";
-box.dataset.open = "false";
-box.dataset.album = "";
-return;
-}
-
 await loadUploadAlbums(galleryId);
 
 box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
 box.dataset.open = "true";
-box.dataset.stage = "album";
-box.dataset.album = String(albumId);
 
 const { data, error } = await supabaseClient
 .from("gallery_photos")
@@ -1547,7 +1295,7 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} â¢ ${getAlbumName(galleryId, photo.album_id)} â¢ $${Number(photo.price || 0).toFixed(2)}</span>
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} - ${getAlbumName(galleryId, photo.album_id)} - $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
@@ -1780,7 +1528,7 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">Finished â¢ Downloadable â¢ $${Number(photo.price || 0).toFixed(2)}</span>
+<span class="badge">Finished - Downloadable - $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},null,'final')">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
@@ -1833,7 +1581,7 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">${photo.is_approved ? "Final" : "Proof"} â¢ ${getAlbumName(galleryId, photo.album_id)} â¢ $${Number(photo.price || 0).toFixed(2)}</span>
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} - ${getAlbumName(galleryId, photo.album_id)} - $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index})">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
@@ -1875,7 +1623,7 @@ const p = currentPhotos[currentPhotoIndex];
 
 document.getElementById("viewerImg").src = p.image_url;
 document.getElementById("viewerInfo").textContent =
-`${currentPhotoIndex + 1} / ${currentPhotos.length} â ${p.is_approved ? "Approved Final" : "Proof"} â ${getAlbumName(currentGalleryId, p.album_id)} â Watermark: ${p.watermark_enabled ? "On" : "Off"} â $${Number(p.price || 0).toFixed(2)}`;
+`${currentPhotoIndex + 1} / ${currentPhotos.length} - ${p.is_approved ? "Approved Final" : "Proof"} - ${getAlbumName(currentGalleryId, p.album_id)} - Watermark: ${p.watermark_enabled ? "On" : "Off"} - $${Number(p.price || 0).toFixed(2)}`;
 
 document.getElementById("editCaption").value = p.caption || "";
 document.getElementById("editPrice").value = Number(p.price || 0).toFixed(2);
@@ -2034,6 +1782,99 @@ await supabaseClient.from("client_galleries").delete().eq("id",galleryId);
 await refreshAll();
 }
 
+
+async function loadGalleryViews(){
+const box = document.getElementById("galleryViewsList");
+if(!box) return;
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading gallery views...</p>`;
+
+const { data, error } = await supabaseClient
+.from("gallery_activity")
+.select("*")
+.eq("event_type","gallery_view")
+.order("created_at",{ascending:false});
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+const statViews = document.getElementById("statViews");
+if(statViews) statViews.textContent = "0";
+return;
+}
+
+const views = data || [];
+const statViews = document.getElementById("statViews");
+if(statViews) statViews.textContent = views.length;
+
+if(!views.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No gallery views yet.</p>`;
+return;
+}
+
+const galleryMap = {};
+allGalleries.forEach(g => {
+galleryMap[g.id] = g;
+});
+
+const grouped = {};
+views.forEach(view => {
+const key = view.gallery_id || "unknown";
+if(!grouped[key]){
+grouped[key] = {
+gallery_id:key,
+count:0,
+last_viewed:view.created_at,
+client_names:new Set(),
+client_emails:new Set()
+};
+}
+grouped[key].count++;
+if(view.client_name) grouped[key].client_names.add(view.client_name);
+if(view.client_email) grouped[key].client_emails.add(view.client_email);
+if(view.created_at && (!grouped[key].last_viewed || new Date(view.created_at) > new Date(grouped[key].last_viewed))){
+grouped[key].last_viewed = view.created_at;
+}
+});
+
+const rows = Object.values(grouped).sort((a,b) => b.count - a.count);
+
+box.innerHTML = "";
+
+rows.forEach(row => {
+const gallery = galleryMap[row.gallery_id];
+const div = document.createElement("div");
+div.className = "item";
+
+div.innerHTML = `
+<strong>${gallery ? gallery.client_name : "Unknown Gallery"}</strong>
+<p><b>Gallery Code:</b> ${gallery ? gallery.gallery_code : row.gallery_id}</p>
+<p><b>Total Views:</b> ${row.count}</p>
+<p><b>Last Viewed:</b> ${row.last_viewed ? new Date(row.last_viewed).toLocaleString() : "Unknown"}</p>
+<p><b>Viewer Names:</b> ${Array.from(row.client_names).join(", ") || "Not provided"}</p>
+<p><b>Viewer Emails:</b> ${Array.from(row.client_emails).join(", ") || "Not provided"}</p>
+`;
+
+box.appendChild(div);
+});
+}
+
+async function clearGalleryViews(){
+if(!confirm("Clear all gallery view records?")) return;
+
+const { error } = await supabaseClient
+.from("gallery_activity")
+.delete()
+.eq("event_type","gallery_view");
+
+if(error){
+alert(error.message);
+return;
+}
+
+await loadGalleryViews();
+}
+
+
 async function loadFavorites(){
 const box = document.getElementById("favoritesList");
 box.innerHTML = `<p style="color:#f3d9b9;">Loading favorites...</p>`;
@@ -2063,8 +1904,8 @@ div.className = "item";
 
 div.innerHTML = `
 <strong>Favorite Selected</strong>
-<p><b>Gallery:</b> ${f.client_galleries?.client_name || ""} â ${f.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${f.client_name || ""} ${f.client_email ? "â " + f.client_email : ""}</p>
+<p><b>Gallery:</b> ${f.client_galleries?.client_name || ""} - ${f.client_galleries?.gallery_code || ""}</p>
+<p><b>Client:</b> ${f.client_name || ""} ${f.client_email ? "- " + f.client_email : ""}</p>
 <p><b>Photo:</b> ${f.gallery_photos?.caption || "Photo"}</p>
 ${f.gallery_photos?.image_url ? `<img src="${f.gallery_photos.image_url}">` : ""}
 <div class="actions">
@@ -2147,7 +1988,7 @@ const statusLabel = String(order.editing_status || "paid_ready_for_editing").rep
 
 div.innerHTML = `
 <h3>${order.client_name || "Client"}</h3>
-<p><b>Gallery:</b> ${order.client_galleries?.client_name || ""} â ${order.client_galleries?.gallery_code || ""}</p>
+<p><b>Gallery:</b> ${order.client_galleries?.client_name || ""} - ${order.client_galleries?.gallery_code || ""}</p>
 <p><b>Email:</b> ${order.client_email || ""}</p>
 <div class="queue-meta">
 <span class="pill">${Number(order.photo_count || selectedIds.length || 0)} photos</span>
@@ -2215,8 +2056,8 @@ div.className = "item";
 
 div.innerHTML = `
 <strong>${r.request_type || "Request"}</strong>
-<p><b>Gallery:</b> ${r.client_galleries?.client_name || ""} â ${r.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${r.client_name || ""} ${r.client_email ? "â " + r.client_email : ""}</p>
+<p><b>Gallery:</b> ${r.client_galleries?.client_name || ""} - ${r.client_galleries?.gallery_code || ""}</p>
+<p><b>Client:</b> ${r.client_name || ""} ${r.client_email ? "- " + r.client_email : ""}</p>
 <p><b>Message:</b> ${r.message || ""}</p>
 ${r.gallery_photos?.image_url ? `<img src="${r.gallery_photos.image_url}">` : ""}
 <div class="actions">
@@ -2283,11 +2124,11 @@ orderType = "Album / Full Gallery Purchase";
 }
 
 div.innerHTML = `
-<strong>${orderType} â $${Number(o.amount || 0).toFixed(2)}</strong>
+<strong>${orderType} - $${Number(o.amount || 0).toFixed(2)}</strong>
 <p><b>Status:</b> ${o.paypal_status || ""}</p>
 <p><b>Order ID:</b> ${o.paypal_order_id || ""}</p>
-<p><b>Gallery:</b> ${o.client_galleries?.client_name || ""} â ${o.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${o.client_name || ""} ${o.client_email ? "â " + o.client_email : ""}</p>
+<p><b>Gallery:</b> ${o.client_galleries?.client_name || ""} - ${o.client_galleries?.gallery_code || ""}</p>
+<p><b>Client:</b> ${o.client_name || ""} ${o.client_email ? "- " + o.client_email : ""}</p>
 <p><b>Photo:</b> ${o.gallery_photos?.caption || "Album / Full Gallery"}</p>
 ${o.gallery_photos?.image_url ? `<img src="${o.gallery_photos.image_url}">` : ""}
 <div class="actions">
@@ -2320,256 +2161,6 @@ await supabaseClient
 
 await loadOrders();
 }
-
-
-async function loadRevenueDashboard(){
-const revTotal = document.getElementById("revTotal");
-const revOrders = document.getElementById("revOrders");
-const revEditOrders = document.getElementById("revEditOrders");
-const revAvg = document.getElementById("revAvg");
-const list = document.getElementById("revenueList");
-
-if(!list) return;
-list.innerHTML = `<p style="color:#f3d9b9;">Loading revenue...</p>`;
-
-const { data: photoOrders, error: photoError } = await supabaseClient
-.from("photo_orders")
-.select("amount,client_name,client_email,order_type,paypal_status,created_at,client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false});
-
-const { data: editOrders, error: editError } = await supabaseClient
-.from("paid_edit_orders")
-.select("amount,client_name,client_email,photo_count,editing_status,paypal_status,created_at,client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false});
-
-const normal = photoError ? [] : (photoOrders || []);
-const edits = editError ? [] : (editOrders || []);
-
-const all = [
-...normal.map(o => ({...o, kind:"Order"})),
-...edits.map(o => ({...o, kind:"Editing"}))
-];
-
-const total = all.reduce((sum,o) => sum + Number(o.amount || 0), 0);
-const count = all.length;
-const avg = count ? total / count : 0;
-
-if(revTotal) revTotal.textContent = "$" + total.toFixed(2);
-if(revOrders) revOrders.textContent = count;
-if(revEditOrders) revEditOrders.textContent = edits.length;
-if(revAvg) revAvg.textContent = "$" + avg.toFixed(2);
-
-if(photoError && editError){
-list.innerHTML = `<p style="color:#ffd38a;">Revenue tables could not load. Make sure photo_orders and paid_edit_orders exist.</p>`;
-return;
-}
-
-if(!all.length){
-list.innerHTML = `<p style="color:#f3d9b9;">No revenue yet.</p>`;
-return;
-}
-
-list.innerHTML = "";
-
-all.slice(0,20).forEach(o => {
-const div = document.createElement("div");
-div.className = "activity-row";
-
-div.innerHTML = `
-<strong>${o.kind} â $${Number(o.amount || 0).toFixed(2)}</strong>
-<p><b>Client:</b> ${o.client_name || ""} ${o.client_email ? "â " + o.client_email : ""}</p>
-<p><b>Gallery:</b> ${o.client_galleries?.client_name || ""} â ${o.client_galleries?.gallery_code || ""}</p>
-<p><b>Status:</b> ${o.paypal_status || o.editing_status || ""}</p>
-`;
-
-list.appendChild(div);
-});
-}
-
-async function loadActivity(){
-const box = document.getElementById("activityList");
-if(!box) return;
-
-box.innerHTML = `<p style="color:#f3d9b9;">Loading activity...</p>`;
-
-const { data, error } = await supabaseClient
-.from("gallery_activity")
-.select("*, client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false})
-.limit(50);
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">Activity table not found yet or could not load.</p>`;
-return;
-}
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No activity yet.</p>`;
-return;
-}
-
-box.innerHTML = "";
-
-data.forEach(a => {
-const div = document.createElement("div");
-div.className = "activity-row";
-
-div.innerHTML = `
-<strong>${a.event_type || "Activity"}</strong>
-<p><b>Gallery:</b> ${a.client_galleries?.client_name || ""} â ${a.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${a.client_name || ""} ${a.client_email ? "â " + a.client_email : ""}</p>
-<p><b>Detail:</b> ${a.event_value || ""}</p>
-<p><b>When:</b> ${a.created_at ? new Date(a.created_at).toLocaleString() : ""}</p>
-`;
-
-box.appendChild(div);
-});
-}
-
-async function clearActivity(){
-if(!confirm("Clear all activity records?")) return;
-
-await supabaseClient
-.from("gallery_activity")
-.delete()
-.neq("id","00000000-0000-0000-0000-000000000000");
-
-await loadActivity();
-}
-
-async function loadPhotoComments(){
-const box = document.getElementById("commentsList");
-if(!box) return;
-
-box.innerHTML = `<p style="color:#f3d9b9;">Loading comments...</p>`;
-
-const { data, error } = await supabaseClient
-.from("photo_comments")
-.select("*, gallery_photos(image_url,caption), client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false})
-.limit(100);
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">Photo comments table not found yet or could not load.</p>`;
-return;
-}
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No comments yet.</p>`;
-return;
-}
-
-box.innerHTML = "";
-
-data.forEach(c => {
-const div = document.createElement("div");
-div.className = "comment-row";
-
-div.innerHTML = `
-<strong>Photo Comment</strong>
-<p><b>Gallery:</b> ${c.client_galleries?.client_name || ""} â ${c.client_galleries?.gallery_code || ""}</p>
-<p><b>Client:</b> ${c.client_name || ""} ${c.client_email ? "â " + c.client_email : ""}</p>
-<p><b>Comment:</b> ${c.comment || ""}</p>
-${c.gallery_photos?.image_url ? `<img src="${c.gallery_photos.image_url}" style="width:120px;height:120px;object-fit:cover;border-radius:14px;margin-top:10px;">` : ""}
-`;
-
-box.appendChild(div);
-});
-}
-
-async function createEditPackage(){
-const gallery_id = document.getElementById("packageGallerySelect")?.value;
-const package_name = document.getElementById("packageNameInput").value.trim();
-const photo_count = parseInt(document.getElementById("packagePhotoCountInput").value || "0", 10);
-const package_price = parseFloat(document.getElementById("packagePriceInput").value || "0");
-const package_description = document.getElementById("packageDescriptionInput").value.trim();
-const msg = document.getElementById("packageMessage");
-
-msg.textContent = "";
-
-if(!gallery_id || !package_name || !photo_count || !package_price){
-msg.textContent = "Gallery, package name, photo count, and price are required.";
-return;
-}
-
-const { error } = await supabaseClient
-.from("edit_packages")
-.insert([{
-gallery_id,
-package_name,
-photo_count,
-package_price,
-package_description,
-is_active:true
-}]);
-
-if(error){
-msg.textContent = error.message;
-return;
-}
-
-document.getElementById("packageNameInput").value = "";
-document.getElementById("packagePhotoCountInput").value = "";
-document.getElementById("packagePriceInput").value = "";
-document.getElementById("packageDescriptionInput").value = "";
-
-msg.textContent = "Package created.";
-await loadEditPackages();
-}
-
-async function loadEditPackages(){
-const box = document.getElementById("packagesList");
-if(!box) return;
-
-box.innerHTML = `<p style="color:#f3d9b9;">Loading packages...</p>`;
-
-const { data, error } = await supabaseClient
-.from("edit_packages")
-.select("*, client_galleries(client_name,gallery_code)")
-.order("created_at",{ascending:false});
-
-if(error){
-box.innerHTML = `<p style="color:#ffd38a;">Edit packages table not found yet or could not load.</p>`;
-return;
-}
-
-if(!data || !data.length){
-box.innerHTML = `<p style="color:#f3d9b9;">No packages yet.</p>`;
-return;
-}
-
-box.innerHTML = "";
-
-data.forEach(pkg => {
-const div = document.createElement("div");
-div.className = "package-row";
-
-div.innerHTML = `
-<strong>${pkg.package_name || "Package"}</strong>
-<p><b>Gallery:</b> ${pkg.client_galleries?.client_name || ""} â ${pkg.client_galleries?.gallery_code || ""}</p>
-<p><b>Photos:</b> ${pkg.photo_count || 0} â <b>Price:</b> $${Number(pkg.package_price || 0).toFixed(2)}</p>
-<p>${pkg.package_description || ""}</p>
-<div class="actions">
-<button class="danger" onclick="deleteEditPackage('${pkg.id}')">Delete Package</button>
-</div>
-`;
-
-box.appendChild(div);
-});
-}
-
-async function deleteEditPackage(id){
-if(!confirm("Delete this package?")) return;
-
-await supabaseClient
-.from("edit_packages")
-.delete()
-.eq("id", id);
-
-await loadEditPackages();
-}
-
-
 
 document.addEventListener("keydown", e => {
 if(document.getElementById("viewer").style.display !== "flex") return;
