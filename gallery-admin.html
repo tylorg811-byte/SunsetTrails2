@@ -524,132 +524,6 @@ header{padding:16px 5%}
 .arrow.right{right:8px}
 .viewer-box img{max-height:45vh}
 }
-
-  /* PREMIUM WIDE ALBUM CARD FIX */
-.album-list{
-  display:block;
-  width:100%;
-  margin-top:18px;
-}
-
-.album-card{
-  width:100%;
-  max-width:none;
-  display:grid;
-  grid-template-columns:1.4fr auto;
-  gap:22px;
-  align-items:center;
-  padding:24px;
-  border-radius:24px;
-  background:linear-gradient(135deg,rgba(255,211,138,.12),rgba(255,255,255,.045));
-  border:1px solid rgba(255,211,138,.28);
-  box-shadow:0 20px 55px rgba(0,0,0,.22);
-}
-
-.album-card strong{
-  display:block;
-  font-family:'Playfair Display',serif;
-  font-size:34px;
-  color:#ffd38a;
-  margin-bottom:8px;
-}
-
-.album-card p{
-  font-size:15px;
-  line-height:1.55;
-  color:#f3d9b9;
-  margin-top:5px;
-}
-
-.album-card .actions{
-  justify-content:flex-end;
-  margin-top:0;
-}
-
-.album-card .actions button{
-  min-width:160px;
-}
-
-@media(max-width:850px){
-  .album-card{
-    grid-template-columns:1fr;
-  }
-
-  .album-card .actions{
-    justify-content:flex-start;
-  }
-
-  .album-card .actions button{
-    width:100%;
-  }
-}
-
-  /* FIX EXISTING GALLERIES + ALBUM STRIP WIDTH */
-.gallery-list{
-  display:block;
-  width:100%;
-}
-
-.gallery-card{
-  width:100%;
-  max-width:none;
-  display:block;
-  overflow:hidden;
-}
-
-.album-list{
-  width:100%;
-  display:block;
-  margin-top:24px;
-}
-
-.album-card{
-  width:100%;
-  max-width:none;
-  display:grid;
-  grid-template-columns:1fr auto;
-  align-items:center;
-  gap:26px;
-  padding:26px 28px;
-  border-radius:24px;
-}
-
-.album-card strong{
-  font-size:34px;
-  line-height:1.05;
-}
-
-.album-card p{
-  max-width:none;
-}
-
-.album-card .actions{
-  display:flex;
-  justify-content:flex-end;
-  align-items:center;
-  gap:12px;
-  margin-top:0;
-  flex-wrap:wrap;
-}
-
-.album-card .actions button{
-  min-width:190px;
-  white-space:nowrap;
-}
-
-@media(max-width:900px){
-  .album-card{
-    grid-template-columns:1fr;
-  }
-
-  .album-card .actions{
-    justify-content:flex-start;
-  }
-
-  .album-card .actions button{
-    width:100%;
-  }
-}
 </style>
 </head>
 
@@ -770,6 +644,11 @@ header{padding:16px 5%}
 <strong>Create Album</strong>
 <span>Create the album and upload photos into it in one step.</span>
 </button>
+
+<button type="button" class="mode-tab" id="modeFinalBtn" onclick="setUploadMode('final')">
+<strong>Finished Photos</strong>
+<span>Upload edited finals into the separate finished section.</span>
+</button>
 </div>
 
 <div class="mode-panel active" id="individualModePanel">
@@ -783,6 +662,10 @@ header{padding:16px 5%}
 <option value="">Choose an album</option>
 </select>
 </div>
+</div>
+
+<div class="mode-panel" id="finalModePanel">
+<div class="helper-box">These photos will appear in a separate Finished / Approved Photos section for the client, with downloads unlocked. They will not be attached to an album.</div>
 </div>
 
 <div class="mode-panel" id="createModePanel">
@@ -826,10 +709,10 @@ header{padding:16px 5%}
 
 <div class="grid">
 <div class="field">
-<label>Upload As</label>
+<label>Photo Status</label>
 <select id="approvedUpload">
 <option value="false">Proof / Watermarked</option>
-<option value="true">Approved Final / Downloadable</option>
+<option value="true">Approved / Downloadable</option>
 </select>
 </div>
 
@@ -1095,7 +978,8 @@ card.innerHTML = `
 
 <div class="actions">
 <button onclick="copyCode('${gallery.gallery_code}')">Copy Code</button>
-<button class="secondary" onclick="viewPhotos('${gallery.id}')">View Photos</button>
+<button class="secondary" onclick="viewPhotos('${gallery.id}')">View Proofs</button>
+<button class="secondary" onclick="viewFinishedPhotos('${gallery.id}')">View Finished</button>
 <button class="secondary" onclick="viewAlbums('${gallery.id}')">Manage Albums</button>
 <button class="secondary" onclick="editGallery('${gallery.id}')">Edit Gallery</button>
 <button class="danger" onclick="deleteGallery('${gallery.id}')">Delete</button>
@@ -1113,12 +997,12 @@ list.appendChild(card);
 function setUploadMode(mode){
 uploadMode = mode;
 
-["Individual","Existing","Create"].forEach(name => {
+["Individual","Existing","Create","Final"].forEach(name => {
 const btn = document.getElementById("mode" + name + "Btn");
 if(btn) btn.classList.remove("active");
 });
 
-["individual","existing","create"].forEach(name => {
+["individual","existing","create","final"].forEach(name => {
 const panel = document.getElementById(name + "ModePanel");
 if(panel) panel.classList.remove("active");
 });
@@ -1218,7 +1102,7 @@ async function viewAlbums(galleryId){
 const box = document.getElementById("albums-" + galleryId);
 if(!box) return;
 
-if(box.dataset.open === "true"){
+if(box.dataset.open === "true" && box.dataset.stage !== "final"){
 box.innerHTML = "";
 box.dataset.open = "false";
 return;
@@ -1343,24 +1227,15 @@ return album ? album.album_name : "Album";
 }
 
 async function viewAlbumPhotos(galleryId, albumId){
+currentGalleryId = galleryId;
+
 const box = document.getElementById("photos-" + galleryId);
 if(!box) return;
-
-/* TOGGLE LOGIC */
-if(box.dataset.open === "true" && box.dataset.album === albumId){
-box.innerHTML = "";
-box.dataset.open = "false";
-box.dataset.album = "";
-return;
-}
-
-currentGalleryId = galleryId;
 
 await loadUploadAlbums(galleryId);
 
 box.innerHTML = `<p style="color:#f3d9b9;">Loading album photos...</p>`;
 box.dataset.open = "true";
-box.dataset.album = albumId;
 
 const { data, error } = await supabaseClient
 .from("gallery_photos")
@@ -1387,9 +1262,7 @@ const div = document.createElement("div");
 div.className = "photo";
 
 div.innerHTML = `
-<span class="badge">
-${photo.is_approved ? "Final" : "Proof"} • $${Number(photo.price || 0).toFixed(2)}
-</span>
+<span class="badge">${photo.is_approved ? "Final" : "Proof"} • ${getAlbumName(galleryId, photo.album_id)} • $${Number(photo.price || 0).toFixed(2)}</span>
 <img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},'${albumId}')">
 <button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
 `;
@@ -1435,7 +1308,9 @@ const galleryId = document.getElementById("gallerySelect").value;
 const files = Array.from(document.getElementById("photoFiles").files || []);
 const caption = document.getElementById("caption").value.trim();
 const price = parseFloat(document.getElementById("photoPrice").value || "0");
-const isApproved = document.getElementById("approvedUpload").value === "true";
+const uploadStage = uploadMode === "final" ? "final" : "proof";
+const statusSelectValue = document.getElementById("approvedUpload").value === "true";
+const isApproved = uploadStage === "final" ? true : statusSelectValue;
 const watermarkEnabled = document.getElementById("watermarkUpload").value === "true";
 const msg = document.getElementById("uploadMessage");
 const albumMsg = document.getElementById("albumMessage");
@@ -1454,6 +1329,10 @@ return;
 }
 
 let albumId = null;
+
+if(uploadMode === "final"){
+albumId = null;
+}
 
 if(uploadMode === "existing"){
 const albumSelect = document.getElementById("uploadAlbumSelect");
@@ -1524,7 +1403,8 @@ file_path: filePath,
 caption: caption || "Sunset Trails Photography",
 is_approved: isApproved,
 watermark_enabled: watermarkEnabled,
-price: price || 0
+price: price || 0,
+photo_stage: uploadStage
 };
 
 if(albumId){
@@ -1555,7 +1435,7 @@ const select = document.getElementById("uploadAlbumSelect");
 if(select && albumId) select.value = albumId;
 }
 
-msg.textContent = albumId ? "Uploaded successfully into album." : "Uploaded successfully as individual photos.";
+msg.textContent = uploadStage === "final" ? "Finished photos uploaded successfully." : (albumId ? "Uploaded successfully into album." : "Uploaded successfully as individual photos.");
 
 const box = document.getElementById("photos-" + galleryId);
 if(box){
@@ -1563,11 +1443,65 @@ box.dataset.open = "false";
 box.innerHTML = "";
 }
 
-if(albumId){
+if(uploadStage === "final"){
+await viewFinishedPhotos(galleryId);
+}else if(albumId){
 await viewAlbumPhotos(galleryId, albumId);
 }else{
 await viewPhotos(galleryId);
 }
+}
+
+
+async function viewFinishedPhotos(galleryId){
+currentGalleryId = galleryId;
+
+const box = document.getElementById("photos-" + galleryId);
+if(!box) return;
+
+if(box.dataset.open === "true" && box.dataset.stage === "final"){
+box.innerHTML = "";
+box.dataset.open = "false";
+box.dataset.stage = "";
+return;
+}
+
+box.innerHTML = `<p style="color:#f3d9b9;">Loading finished photos...</p>`;
+box.dataset.open = "true";
+box.dataset.stage = "final";
+
+const { data, error } = await supabaseClient
+.from("gallery_photos")
+.select("*")
+.eq("gallery_id",galleryId)
+.eq("photo_stage","final")
+.order("created_at",{ascending:true});
+
+if(error){
+box.innerHTML = `<p style="color:#ffd38a;">${error.message}</p>`;
+return;
+}
+
+if(!data || !data.length){
+box.innerHTML = `<p style="color:#f3d9b9;">No finished photos uploaded yet.</p>`;
+return;
+}
+
+currentPhotos = data;
+box.innerHTML = `<div style="grid-column:1/-1;color:#ffd38a;font-weight:900;margin-bottom:4px;">Finished / Approved Photos</div>`;
+
+data.forEach((photo,index) => {
+const div = document.createElement("div");
+div.className = "photo";
+
+div.innerHTML = `
+<span class="badge">Finished • Downloadable • $${Number(photo.price || 0).toFixed(2)}</span>
+<img src="${photo.image_url}" onclick="openViewer('${galleryId}',${index},null,'final')">
+<button onclick="deletePhotoFromGrid('${photo.id}','${photo.file_path}','${galleryId}')">Delete</button>
+`;
+
+box.appendChild(div);
+});
 }
 
 async function viewPhotos(galleryId){
@@ -1575,9 +1509,10 @@ currentGalleryId = galleryId;
 
 const box = document.getElementById("photos-" + galleryId);
 
-if(box.dataset.open === "true"){
+if(box.dataset.open === "true" && box.dataset.stage === "proof"){
 box.innerHTML = "";
 box.dataset.open = "false";
+box.dataset.stage = "";
 return;
 }
 
@@ -1587,6 +1522,7 @@ const { data, error } = await supabaseClient
 .from("gallery_photos")
 .select("*")
 .eq("gallery_id",galleryId)
+.or("photo_stage.eq.proof,photo_stage.is.null")
 .order("created_at",{ascending:true});
 
 if(error){
@@ -1605,6 +1541,7 @@ currentPhotos = data;
 
 box.innerHTML = "";
 box.dataset.open = "true";
+box.dataset.stage = "proof";
 
 data.forEach((photo,index) => {
 const div = document.createElement("div");
@@ -1620,7 +1557,7 @@ box.appendChild(div);
 });
 }
 
-async function openViewer(galleryId,index,albumId = null){
+async function openViewer(galleryId,index,albumId = null,stage = null){
 currentGalleryId = galleryId;
 
 let query = supabaseClient
@@ -1630,6 +1567,12 @@ let query = supabaseClient
 
 if(albumId){
 query = query.eq("album_id", albumId);
+}
+
+if(stage === "final"){
+query = query.eq("photo_stage", "final");
+}else if(!albumId){
+query = query.or("photo_stage.eq.proof,photo_stage.is.null");
 }
 
 const { data } = await query.order("created_at",{ascending:true});
