@@ -724,6 +724,11 @@ header{padding:17px 5%}
 .arrow.left{left:8px}
 .arrow.right{right:8px}
 }
+
+/* PAID EDIT SELECTION WORKFLOW */
+.edit-pay-btn{background:linear-gradient(135deg,#ffd38a,#c77b28);color:#1b0e04;}
+.selection-summary{margin-top:12px;padding:14px 16px;border-radius:18px;background:rgba(255,211,138,.11);border:1px solid rgba(255,211,138,.22);color:#f3d9b9;font-size:14px;line-height:1.5;}
+.selection-summary strong{color:#ffd38a}
 </style>
 </head>
 
@@ -806,6 +811,7 @@ header{padding:17px 5%}
 <div>
 <strong id="cartTotal">$0.00 cart total</strong>
 <div class="actions">
+<button class="edit-pay-btn" onclick="payForSelectedEdits()">Pay For Selected Edits</button>
 <button onclick="openCart()">Checkout With PayPal</button>
 <button class="secondary" onclick="clearCart()">Clear Cart</button>
 </div>
@@ -849,7 +855,7 @@ header{padding:17px 5%}
 <div class="modal" id="cartModal">
 <div class="modal-box">
 <h3>Checkout</h3>
-<p>Your selected purchase items are below. PayPal will open securely when checkout is connected.</p>
+<p>Your selected items are below. Proof editing selections must be paid before editing begins.</p>
 
 <div class="cart-items" id="cartItems"></div>
 
@@ -869,6 +875,8 @@ const SUPABASE_URL = "https://mcjqykkjyvhcqlfjwzpo.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FUd4Y2AZi3dKEO_mGwnjxA_Ixrjv0v8";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const DEFAULT_EDIT_PRICE_PER_PHOTO = 10;
 
 let currentGallery = null;
 let currentPhotos = [];
@@ -940,7 +948,7 @@ const { data: photos, error: photoError } = await supabaseClient
 .order("created_at", { ascending:true });
 
 document.getElementById("clientName").textContent = gallery.client_name + " Gallery";
-document.getElementById("galleryNotes").textContent = gallery.notes || "Watermarked proofs are previews. Approved finals can be downloaded. Favorite the images you love or purchase additional photos below.";
+document.getElementById("galleryNotes").textContent = gallery.notes || "Watermarked proofs are previews. Favorite the images you want edited, pay for your selected edits, then finished photos will appear in the Finished Photos section once uploaded.";
 
 renderPurchaseAlbums();
 
@@ -1154,9 +1162,16 @@ updateFavoriteCount();
 renderGallery();
 }
 
+function getEditPrice(){
+const price = Number(currentGallery?.edit_price_per_photo || 0);
+return price > 0 ? price : DEFAULT_EDIT_PRICE_PER_PHOTO;
+}
+
 function updateFavoriteCount(){
+const count = favorites.size;
+const total = count * getEditPrice();
 document.getElementById("favoriteCount").textContent =
-favorites.size + (favorites.size === 1 ? " favorite selected" : " favorites selected");
+count + (count === 1 ? " photo selected for editing" : " photos selected for editing") + " — $" + total.toFixed(2);
 }
 
 async function submitFavorites(){
@@ -1186,7 +1201,37 @@ alert(error.message);
 return;
 }
 
-alert("Favorites submitted successfully.");
+alert("Selections submitted successfully. To start editing, use Pay For Selected Edits.");
+}
+
+function payForSelectedEdits(){
+if(!currentGallery || !requireClientInfo()) return;
+
+const selectedPhotos = currentPhotos.filter(photo => favorites.has(photo.id) && photo.photo_stage !== "final");
+
+if(!selectedPhotos.length){
+alert("Select the proof photos you want edited first by tapping the heart on each photo.");
+return;
+}
+
+const editPrice = getEditPrice();
+const total = selectedPhotos.length * editPrice;
+const selectionId = "edit_selection_" + currentGallery.id;
+
+cart = cart.filter(item => item.type !== "edit_selection");
+
+cart.push({
+id: selectionId,
+photo_id: null,
+type: "edit_selection",
+caption: `${selectedPhotos.length} selected photo${selectedPhotos.length === 1 ? "" : "s"} for editing`,
+price: total,
+edit_price_each: editPrice,
+selected_photo_ids: selectedPhotos.map(photo => photo.id)
+});
+
+updateCartUI();
+openCart();
 }
 
 function addToCart(photoId){
@@ -1365,7 +1410,7 @@ cart.forEach(item => {
 const div = document.createElement("div");
 div.className = "cart-item";
 div.innerHTML = `
-<span>${item.caption}</span>
+<span>${item.caption}${item.type === "edit_selection" ? `<br><small>${item.selected_photo_ids.length} photos × $${item.edit_price_each.toFixed(2)} each</small>` : ""}</span>
 <strong>$${item.price.toFixed(2)}</strong>
 `;
 box.appendChild(div);
@@ -1407,9 +1452,13 @@ value:total
 
 onApprove:function(data,actions){
 return actions.order.capture().then(async function(details){
-const inserts = cart.map(item => ({
+const normalOrders = cart
+.filter(item => item.type !== "edit_selection")
+.map(item => ({
 gallery_id: currentGallery.id,
 photo_id: item.photo_id,
+album_id: item.album_id || null,
+order_type: item.type,
 client_name: getClientName(),
 client_email: getClientEmail(),
 amount: item.price,
@@ -1417,13 +1466,35 @@ paypal_order_id: data.orderID,
 paypal_status: details.status || "COMPLETED"
 }));
 
-const { error } = await supabaseClient
-.from("photo_orders")
-.insert(inserts);
+const editingOrders = cart
+.filter(item => item.type === "edit_selection")
+.map(item => ({
+gallery_id: currentGallery.id,
+client_name: getClientName(),
+client_email: getClientEmail(),
+selected_photo_ids: item.selected_photo_ids,
+photo_count: item.selected_photo_ids.length,
+price_per_photo: item.edit_price_each,
+amount: item.price,
+paypal_order_id: data.orderID,
+paypal_status: details.status || "COMPLETED",
+editing_status: "paid_ready_for_editing"
+}));
 
+if(normalOrders.length){
+const { error } = await supabaseClient.from("photo_orders").insert(normalOrders);
 if(error){
 document.getElementById("cartMessage").textContent = "Payment completed, but order save failed: " + error.message;
 return;
+}
+}
+
+if(editingOrders.length){
+const { error } = await supabaseClient.from("paid_edit_orders").insert(editingOrders);
+if(error){
+document.getElementById("cartMessage").textContent = "Payment completed, but editing order save failed: " + error.message;
+return;
+}
 }
 
 document.getElementById("cartMessage").textContent = "Payment successful. Your order was sent.";
