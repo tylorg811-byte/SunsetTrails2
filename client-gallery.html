@@ -981,8 +981,8 @@ header{padding:17px 5%}
 </section>
 
 <div class="lightbox" id="lightbox">
-<span class="close" onclick="closeLightbox()">×</span>
-<button class="arrow left" onclick="prevPhoto()">‹</button>
+<span class="close" onclick="closeLightbox()">Ã</span>
+<button class="arrow left" onclick="prevPhoto()">â¹</button>
 
 <div class="viewer-box">
 <img id="lightboxImg">
@@ -990,7 +990,7 @@ header{padding:17px 5%}
 <p id="viewerCount" style="color:#ffd38a;font-weight:900;margin-top:12px;"></p>
 </div>
 
-<button class="arrow right" onclick="nextPhoto()">›</button>
+<button class="arrow right" onclick="nextPhoto()">âº</button>
 </div>
 
 <div class="modal" id="requestModal">
@@ -1063,6 +1063,28 @@ return false;
 return true;
 }
 
+
+async function trackGalleryView(){
+if(!currentGallery) return;
+
+try{
+await supabaseClient
+.from("gallery_activity")
+.insert([{
+gallery_id: currentGallery.id,
+client_name: getClientName(),
+client_email: getClientEmail(),
+event_type: "gallery_view",
+event_value: currentGallery.gallery_code || "",
+page_url: window.location.href,
+user_agent: navigator.userAgent
+}]);
+}catch(err){
+console.log("Gallery view tracking skipped:", err);
+}
+}
+
+
 async function loadGallery(){
 const code = document.getElementById("codeInput").value.trim().toUpperCase();
 const message = document.getElementById("message");
@@ -1091,6 +1113,8 @@ return;
 }
 
 currentGallery = gallery;
+
+await trackGalleryView();
 
 const { data: albums, error: albumError } = await supabaseClient
 .from("photo_albums")
@@ -1188,7 +1212,7 @@ card.innerHTML = `
 <img src="${photo.image_url}" alt="${photo.caption || 'Client photo'}">
 ${showWatermark ? `<div class="watermark-overlay"><span>Sunset Trails</span></div>` : ""}
 <span class="status">${photo.is_approved ? "Approved Final" : "Proof Preview"}</span>
-<button class="favorite-chip ${isFav ? "active" : ""}" onclick="event.stopPropagation();toggleFavorite('${photo.id}')">${isFav ? "♥" : "♡"}</button>
+<button class="favorite-chip ${isFav ? "active" : ""}" onclick="event.stopPropagation();toggleFavorite('${photo.id}')">${isFav ? "â¥" : "â¡"}</button>
 </div>
 
 <div class="card-content">
@@ -1330,7 +1354,7 @@ function updateFavoriteCount(){
 const count = favorites.size;
 const total = count * getEditPrice();
 document.getElementById("favoriteCount").textContent =
-count + (count === 1 ? " photo selected for editing" : " photos selected for editing") + " — $" + total.toFixed(2);
+count + (count === 1 ? " photo selected for editing" : " photos selected for editing") + " â $" + total.toFixed(2);
 }
 
 async function submitFavorites(){
@@ -1342,7 +1366,7 @@ return;
 }
 
 const favoritePhotos = currentPhotos.filter(p => favorites.has(p.id));
-const message = favoritePhotos.map((p,i) => `${i+1}. ${p.caption || "Photo"} — ${p.id}`).join("\n");
+const message = favoritePhotos.map((p,i) => `${i+1}. ${p.caption || "Photo"} â ${p.id}`).join("\n");
 
 const { error } = await supabaseClient
 .from("gallery_requests")
@@ -1569,7 +1593,7 @@ cart.forEach(item => {
 const div = document.createElement("div");
 div.className = "cart-item";
 div.innerHTML = `
-<span>${item.caption}${item.type === "edit_selection" ? `<br><small>${item.selected_photo_ids.length} photos × $${item.edit_price_each.toFixed(2)} each</small>` : ""}</span>
+<span>${item.caption}${item.type === "edit_selection" ? `<br><small>${item.selected_photo_ids.length} photos Ã $${item.edit_price_each.toFixed(2)} each</small>` : ""}</span>
 <strong>$${item.price.toFixed(2)}</strong>
 `;
 box.appendChild(div);
@@ -1691,7 +1715,7 @@ const photo = currentPhotos[currentIndex];
 
 document.getElementById("lightboxImg").src = photo.image_url;
 document.getElementById("viewerCount").textContent =
-(currentIndex + 1) + " / " + currentPhotos.length + " — " + (photo.is_approved ? "Approved Final" : "Proof Preview");
+(currentIndex + 1) + " / " + currentPhotos.length + " â " + (photo.is_approved ? "Approved Final" : "Proof Preview");
 
 document.getElementById("viewerWatermark").style.display =
 (photo.is_approved !== true && photo.watermark_enabled !== false) ? "flex" : "none";
@@ -1725,7 +1749,7 @@ document.getElementById("requestMessage").value = "";
 document.getElementById("requestStatus").textContent = "";
 
 document.getElementById("requestPhotoText").textContent =
-`Requesting: ${selectedPhoto.caption || "Photo"}${selectedPhoto.price && selectedPhoto.price > 0 ? " — $" + Number(selectedPhoto.price).toFixed(2) : ""}`;
+`Requesting: ${selectedPhoto.caption || "Photo"}${selectedPhoto.price && selectedPhoto.price > 0 ? " â $" + Number(selectedPhoto.price).toFixed(2) : ""}`;
 
 document.getElementById("requestModal").style.display = "flex";
 }
