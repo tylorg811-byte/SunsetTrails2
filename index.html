@@ -602,15 +602,15 @@ reveals.forEach(el=>revealObserver.observe(el));
 document.getElementById("year").textContent=new Date().getFullYear();
 
 /* =========================
-   PORTAL TRACKING
-   Replace placeholders later.
+   PORTAL TRACKING - FIXED
+   Sunset Trails Photography
 ========================= */
 const PORTAL_TRACKING={
   enabled:true,
   supabaseUrl:"https://ujxuirmeikbzakqaerec.supabase.co",
   supabaseAnonKey:"sb_publishable_gLnNGeQUUbjLoQlN5g2t9g_XXQpy9P3",
   clientId:"a09be521-c970-4d3a-852d-e119ee4693df",
-  siteId:"YOUR_SITE_ID_HERE",
+  siteId:"sunset-trails-photography",
   analyticsTable:"site_analytics",
   eventsTable:"site_events"
 };
@@ -618,26 +618,65 @@ const PORTAL_TRACKING={
 (function(){
   if(!PORTAL_TRACKING.enabled)return;
 
+  if(!window.supabase){
+    console.warn("Portal tracking skipped: Supabase library did not load.");
+    return;
+  }
+
   if(
     PORTAL_TRACKING.supabaseUrl.includes("YOUR_") ||
-    PORTAL_TRACKING.supabaseAnonKey.includes("YOUR_")
+    PORTAL_TRACKING.supabaseAnonKey.includes("YOUR_") ||
+    PORTAL_TRACKING.clientId.includes("YOUR_") ||
+    PORTAL_TRACKING.siteId.includes("YOUR_")
   ){
-    console.log("Portal tracking placeholders are not filled yet.");
+    console.warn("Portal tracking skipped: tracking placeholders are not filled.");
     return;
   }
 
   const client=window.supabase.createClient(
     PORTAL_TRACKING.supabaseUrl,
-    PORTAL_TRACKING.supabaseAnonKey
+    PORTAL_TRACKING.supabaseAnonKey,
+    {
+      auth:{
+        persistSession:false,
+        autoRefreshToken:false,
+        detectSessionInUrl:false
+      }
+    }
   );
 
   const sessionKey="sunset_trails_session_id";
-  let sessionId=localStorage.getItem(sessionKey);
 
-  if(!sessionId){
-    sessionId=crypto.randomUUID();
-    localStorage.setItem(sessionKey,sessionId);
+  function safeUUID(){
+    if(window.crypto && crypto.randomUUID){
+      return crypto.randomUUID();
+    }
+    return "session_" + Date.now() + "_" + Math.random().toString(36).slice(2);
   }
+
+  function getStoredSession(){
+    try{
+      const saved=sessionStorage.getItem(sessionKey) || localStorage.getItem(sessionKey);
+      if(saved)return saved;
+
+      const created=safeUUID();
+
+      try{sessionStorage.setItem(sessionKey,created);}catch(e){}
+      try{localStorage.setItem(sessionKey,created);}catch(e){}
+
+      return created;
+    }catch(error){
+      return safeUUID();
+    }
+  }
+
+  const sessionId=getStoredSession();
+  const startedAt=Date.now();
+  let maxScroll=0;
+  let hasTracked25=false;
+  let hasTracked50=false;
+  let hasTracked75=false;
+  let hasTracked90=false;
 
   function getDevice(){
     if(window.innerWidth<=600)return"mobile";
@@ -645,12 +684,17 @@ const PORTAL_TRACKING={
     return"desktop";
   }
 
+  function getPage(){
+    const path=window.location.pathname || "/";
+    return path === "/" ? "/index.html" : path;
+  }
+
   async function trackPageView(){
     try{
       await client.from(PORTAL_TRACKING.analyticsTable).insert({
         client_id:PORTAL_TRACKING.clientId,
         site_id:PORTAL_TRACKING.siteId,
-        page:window.location.pathname || "/",
+        page:getPage(),
         title:document.title,
         referrer:document.referrer || "direct",
         device:getDevice(),
@@ -670,7 +714,7 @@ const PORTAL_TRACKING={
         site_id:PORTAL_TRACKING.siteId,
         event_name:eventName,
         event_data:eventData,
-        page:window.location.pathname || "/",
+        page:getPage(),
         session_id:sessionId,
         created_at:new Date().toISOString()
       });
@@ -679,13 +723,57 @@ const PORTAL_TRACKING={
     }
   }
 
+  function getScrollPercent(){
+    const doc=document.documentElement;
+    const scrollTop=window.scrollY || doc.scrollTop;
+    const scrollHeight=doc.scrollHeight - window.innerHeight;
+    if(scrollHeight<=0)return 0;
+    return Math.min(100,Math.round((scrollTop/scrollHeight)*100));
+  }
+
   trackPageView();
+
+  window.addEventListener("scroll",()=>{
+    maxScroll=Math.max(maxScroll,getScrollPercent());
+
+    if(maxScroll>=25 && !hasTracked25){
+      hasTracked25=true;
+      trackEvent("scroll_depth",{percent:25});
+    }
+
+    if(maxScroll>=50 && !hasTracked50){
+      hasTracked50=true;
+      trackEvent("scroll_depth",{percent:50});
+    }
+
+    if(maxScroll>=75 && !hasTracked75){
+      hasTracked75=true;
+      trackEvent("scroll_depth",{percent:75});
+    }
+
+    if(maxScroll>=90 && !hasTracked90){
+      hasTracked90=true;
+      trackEvent("scroll_depth",{percent:90});
+    }
+  },{passive:true});
 
   document.querySelectorAll("a").forEach(link=>{
     link.addEventListener("click",()=>{
       trackEvent("link_click",{
-        text:link.innerText,
-        href:link.href
+        text:(link.innerText || link.getAttribute("aria-label") || "link").trim(),
+        href:link.href || "",
+        is_client_gallery:link.href.includes("client-gallery"),
+        is_booking_link:link.getAttribute("href")==="#booking",
+        is_portal_link:link.href.includes("YOUR_PORTAL_URL_HERE") ? false : link.classList.contains("client-portal-btn")
+      });
+    });
+  });
+
+  document.querySelectorAll(".btn.primary,.btn.secondary,.client-portal-btn").forEach(button=>{
+    button.addEventListener("click",()=>{
+      trackEvent("cta_click",{
+        text:(button.innerText || "CTA").trim(),
+        href:button.href || button.getAttribute("href") || ""
       });
     });
   });
@@ -696,6 +784,27 @@ const PORTAL_TRACKING={
         form:"booking_request"
       });
     });
+  });
+
+  window.addEventListener("beforeunload",()=>{
+    const seconds=Math.round((Date.now()-startedAt)/1000);
+
+    const payload={
+      client_id:PORTAL_TRACKING.clientId,
+      site_id:PORTAL_TRACKING.siteId,
+      event_name:"page_exit",
+      event_data:{
+        seconds_on_page:seconds,
+        max_scroll_percent:maxScroll
+      },
+      page:getPage(),
+      session_id:sessionId,
+      created_at:new Date().toISOString()
+    };
+
+    try{
+      client.from(PORTAL_TRACKING.eventsTable).insert(payload);
+    }catch(error){}
   });
 })();
 </script>
